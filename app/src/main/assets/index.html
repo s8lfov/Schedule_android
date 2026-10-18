@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Расписание ИВ 234</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d28d9'/%3E%3Ctext x='50' y='46' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='700' font-size='38' fill='white'%3EIV%3C/text%3E%3Ctext x='50' y='84' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='700' font-size='38' fill='white'%3E234%3C/text%3E%3C/svg%3E">
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#1d2433;--muted:#6b7385;--line:#e2e5ee;--accent:#6d28d9;--hl:#f1eafd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161c;--card:#1d2029;--text:#eceef4;--muted:#9aa1b3;--line:#313644;--accent:#8b5cf6;--hl:#2d2442}}
+:root[data-theme="dark"]{--bg:#14161c;--card:#1d2029;--text:#eceef4;--muted:#9aa1b3;--line:#313644;--accent:#8b5cf6;--hl:#2d2442}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 12px 40px}
+.wrap{max-width:1200px;margin:0 auto}
+.hero{text-align:center;margin:10px 0 24px}
+.hero small{display:block;margin:4px 0 8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+.hero .num{font-size:clamp(64px,14vw,120px);font-weight:800;line-height:1;color:var(--accent)}
+.hero .lbl{font-size:clamp(18px,3vw,26px);font-weight:600}
+.hero .sub{color:var(--muted);margin-top:6px;font-size:14px}
+.nav{display:flex;justify-content:center;gap:8px;margin-top:18px;flex-wrap:wrap}
+button:disabled{opacity:.4;cursor:default}
+button:disabled:hover{border-color:var(--line)}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 14px;border-radius:10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+.scroll{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:900px;table-layout:fixed}
+th,td{border:1px solid var(--line);padding:8px;vertical-align:top;font-size:13px}
+th{background:var(--card);font-size:14px}
+th.today{background:var(--accent);color:#fff}
+td.today{background:var(--hl)}
+th.n,td.n{width:42px;text-align:center;font-weight:700;color:var(--muted);vertical-align:middle}
+.les{margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.les:last-child{margin:0;padding:0;border:0}
+.les b{display:block;font-size:14px}
+.les .r{color:var(--accent);font-weight:600}
+.les .t{color:var(--muted);font-size:12px}
+.empty{color:var(--muted);text-align:center}
+td.off{background:var(--bg);opacity:.55}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);padding:16px;width:min(560px,94vw);max-height:90vh;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.dh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:18px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{padding:6px 12px}
+.tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.bt{min-width:0;table-layout:auto;margin-bottom:14px}
+.bt th{text-align:left}
+.bt tr.long td{background:#f5e663;color:#222}
+.bt tr.cur td{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
+.bh{margin:6px 0;font-weight:700;color:var(--accent)}
+#cards{display:none}
+.dc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.dc.today{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.dc.off{opacity:.55}
+.dh2{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:17px}
+.dh2 span{color:var(--muted);font-size:13px}
+.dc.today .dh2 b{color:var(--accent)}
+.cp{padding:8px 0;border-top:1px solid var(--line)}
+.ct{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:4px}
+.ct b{color:var(--text)}
+@media (max-width:760px){
+ body{padding:12px 10px 32px}
+ .scroll{display:none}
+ #cards{display:block}
+ .hero{margin:4px 0 16px}
+ .nav button{flex:1 1 30%;padding:11px 8px}
+ #bells{flex-basis:100%}
+ dialog{padding:12px;width:96vw}
+ .bt td,.bt th{padding:6px 5px;font-size:12px}
+ .les b{font-size:15px}
+ .les .t{font-size:13px}
+}
+td.hol{text-align:center;vertical-align:middle;background:var(--hl)}
+.hb{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px}
+.hb .hi{font-size:28px}
+.hb b{font-size:15px}
+.seeb{margin-top:6px;background:var(--accent);color:#fff;border-color:var(--accent);font-size:13px;padding:8px 12px}
+.seeb:hover{opacity:.9}
+.dc .hb{padding:6px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="num" id="num">–</div>
+    <small>Учебная неделя</small>
+    <div class="lbl" id="range"></div>
+    <div class="sub" id="sub"></div>
+  </div>
+  <div class="scroll"><table id="tbl"></table></div>
+  <div id="cards"></div>
+  <div class="nav">
+    <button id="prev">← Пред. неделя</button>
+    <button id="cur">Сегодня</button>
+    <button id="next">След. неделя →</button>
+    <button id="bells">🔔 Звонки</button>
+  </div>
+  <dialog id="dlg"><div class="dh"><b>🔔 Расписание звонков</b><button id="x">✕</button></div><div class="tabs" id="tabs"></div><div id="bc"></div></dialog>
+  <dialog id="dlg2"><div class="dh"><b id="h2t"></b><button id="x2">✕</button></div><div id="h2c"></div></dialog>
+</div>
+<script>
+const DAYS=["Понедельник","Вторник","Среда","Четверг","Пятница"];
+const T={fk:["Физ.культура","Волков В.В."]};
+// [пара, день(0-4), название, аудитория, недели, преподаватель]
+const L=[
+[1,0,"Физ.культура","","4,6,8,13-15","Волков В.В."],
+[1,0,"МДК.05.01.","106л","5,7,9,16","Лукьянова С.П."],
+[2,0,"МДК.05.01.","106л","1-13,15,16","Лукьянова С.П."],
+[3,0,"МДК.05.02.","106л","1-13,16","Лукьянова С.П."],
+[4,0,"МДК.05.03.","315л","1-12,17","Николаенко К.С."],
+
+[1,1,"МДК.05.02.","106л","1-13,16","Лукьянова С.П."],
+[2,1,"МДК.05.01.","106л","1-13,16","Лукьянова С.П."],
+[2,1,"Ин.язык","409 / 314","14","Кривцова С.Н. / Степаненко О.А."],
+[3,1,"МДК.05.01.","106л","1,3,6,8,10,12,13","Лукьянова С.П."],
+[3,1,"ПОПД","412","2,4,5,7,9,11,14-17","Минина М.Х."],
+[4,1,"Ин.язык","409 / 314","1,3,5-8,10,12,14-17","Кривцова С.Н. / Степаненко О.А."],
+[5,1,"Физ.культура","","14,15,17","Волков В.В."],
+
+[1,2,"Основы фил.","234","14,15,17","Волошина Т.К."],
+[1,2,"МДК.05.02.","106л","13","Лукьянова С.П."],
+[2,2,"ОПСО","321","1-17","Павлихина Е.В."],
+[3,2,"Основы фил.","234","1-17","Волошина Т.К."],
+[4,2,"Эконом. отр.","318","1-17","Ковзаренко Л.Н."],
+[5,2,"МДК.05.03.","315л","1-17","Николаенко К.С."],
+
+[1,3,"МДК.05.02.","106л","11,12,13,16","Лукьянова С.П."],
+[1,3,"Физ.культура","","14,15,17","Волков В.В."],
+[2,3,"МДК.05.01.","106л","1-17","Лукьянова С.П."],
+[3,3,"ОПСО","321","1-8,14,15,17","Павлихина Е.В."],
+[3,3,"МДК.05.01.","106л","13,16","Лукьянова С.П."],
+[4,3,"МДК.05.03.","315л","1-12,17","Николаенко К.С."],
+[4,3,"Ин.язык","409 / 314","14,15","Кривцова С.Н. / Степаненко О.А."],
+
+[1,4,"МДК.05.01.","106л","2,4,9,11","Лукьянова С.П."],
+[1,4,"Основы фил.","234","5,10,13-17","Волошина Т.К."],
+[2,4,"МДК.05.02.","106л","1-17","Лукьянова С.П."],
+[3,4,"ПОПД","412","1-17","Минина М.Х."],
+[4,4,"Эконом. отр.","318","1,3,4,6-8,10,12-17","Ковзаренко Л.Н."],
+[4,4,"Физ.культура","","2,9,11","Волков В.В."],
+[5,4,"МДК.05.03.","315л","1-3,9,10,17","Николаенко К.С."],
+[5,4,"МДК.05.01.","106л","11,12","Лукьянова С.П."]
+];
+
+function parseWeeks(s){const o=new Set();s.split(",").forEach(p=>{const[a,b]=p.split("-").map(Number);for(let i=a;i<=(b||a);i++)o.add(i)});return o}
+L.forEach(l=>l.w=parseWeeks(l[4]));
+
+const DAY=864e5;
+const utc=d=>Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());
+const now=new Date();
+const year=2026; // расписание действует только в 2026 году
+const sep1=new Date(year,8,1);
+const mon1=utc(sep1)-((sep1.getDay()+6)%7)*DAY; // понедельник недели с 1 сентября
+const dow=(now.getDay()+6)%7; // 0=Пн … 6=Вс
+const effDay=utc(now)+(dow>=5?(7-dow)*DAY:0); // в выходные — уже следующая неделя
+const realWeek=Math.floor((effDay-mon1)/DAY/7)+1;
+const todayIdx=(now.getDay()+6)%7; // 0=Пн … 6=Вс
+const START=Date.UTC(2026,8,1), END=Date.UTC(2026,11,31); // период: 1 сентября – 31 декабря 2026
+const maxWeek=Math.floor((END-mon1)/DAY/7)+1; // последняя неделя, начинающаяся в 2026
+const inRange=utc(now)>=START&&utc(now)<=END;
+const home=inRange?realWeek:(utc(now)<START?1:maxWeek);
+let week=home;
+
+const fmt=t=>new Date(t).toLocaleDateString("ru-RU",{day:"numeric",month:"long",timeZone:"UTC"});
+
+function render(){
+  const start=mon1+(week-1)*7*DAY, end=start+4*DAY; // только будни (Пн–Пт)
+  document.getElementById("num").textContent=week;
+  document.getElementById("prev").disabled=week<=1;
+  document.getElementById("next").disabled=week>=maxWeek;
+  document.getElementById("range").textContent=fmt(start)+" – "+fmt(end);
+  const sub=document.getElementById("sub");
+  sub.textContent=(inRange&&week===realWeek?"Текущая неделя · ":"")+"учебный год 2026: с 1 сентября по 31 декабря"+(!inRange?" · сегодня вне периода расписания":"")+(week>17?" · занятий по расписанию нет":"");
+  const isCur=inRange&&week===realWeek;
+  let h="<thead><tr><th class='n'>№</th>";
+  DAYS.forEach((d,i)=>{
+    const dt=new Date(start+i*DAY);
+    h+=`<th class="${isCur&&i===todayIdx?"today":""}">${d}<br><span style="font-weight:400;font-size:12px">${dt.toLocaleDateString("ru-RU",{day:"numeric",month:"short",timeZone:"UTC"})}</span></th>`;
+  });
+  h+="</tr></thead><tbody>";
+  for(let p=1;p<=5;p++){
+    h+=`<tr><td class="n">${p}</td>`;
+    for(let d=0;d<5;d++){
+      const dayT=start+d*DAY, off=dayT<START||dayT>END;
+      const hol=HOL[iso(dayT)];
+      if(hol){
+        if(p===1){const n=L.some(l=>l[1]===d&&l.w.has(week));
+          h+=`<td rowspan="5" class="hol${isCur&&d===todayIdx?" today":""}">${holBox(hol,d,n)}</td>`;}
+        continue;
+      }
+      const ls=off?[]:L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(week));
+      h+=`<td class="${isCur&&d===todayIdx?"today":""}${off?" off":""}">`+(ls.length?ls.map(l=>
+        `<div class="les"><b>${l[2]}</b>${l[3]?`<span class="r">каб. ${l[3]}</span>`:""}<div class="t">${l[5]}</div></div>`).join(""):`<div class="empty">—</div>`)+"</td>";
+    }
+    h+="</tr>";
+  }
+  document.getElementById("tbl").innerHTML=h+"</tbody>";
+  let cs="";
+  for(let d=0;d<5;d++){
+    const dayT=start+d*DAY, off=dayT<START||dayT>END;
+    const hol=HOL[iso(dayT)];
+    let body="";
+    if(hol)body=holBox(hol,d,L.some(l=>l[1]===d&&l.w.has(week)));
+    for(let p=1;p<=5;p++){
+      const ls=off?[]:L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(week));
+      if(!ls.length||hol)continue;
+      const br=G[gk(d)].rows.find(r=>r[0]===String(p));
+      body+=`<div class="cp"><div class="ct"><b>${p} пара</b><span>${br?br[1]:""}</span></div>`+ls.map(l=>`<div class="les"><b>${l[2]}</b>${l[3]?`<span class="r">каб. ${l[3]}</span>`:""}<div class="t">${l[5]}</div></div>`).join("")+"</div>";
+    }
+    cs+=`<div class="dc${isCur&&d===todayIdx?" today":""}${off?" off":""}"><div class="dh2"><b>${DAYS[d]}</b><span>${fmt(dayT)}</span></div>${body||'<div class="empty">Занятий нет</div>'}</div>`;
+  }
+  document.getElementById("cards").innerHTML=cs;
+}
+document.getElementById("prev").onclick=()=>{if(week>1){week--;render()}};
+document.getElementById("next").onclick=()=>{if(week<maxWeek){week++;render()}};
+document.getElementById("cur").onclick=()=>{week=home;render()};
+// ===== Звонки =====
+const G={
+ mon:{name:"Понедельник",rows:[["Поднятие флага","8:15–8:25","по графику"],["Разговоры о важном","8:30–9:15","9:15–9:25"],["1","9:25–10:55","10:55–11:05"],["2","11:05–12:35","12:35–13:05",1],["3","13:05–14:35","14:35–14:45"],["4","14:45–16:15","16:15–16:25"],["5","16:25–17:55","17:55–18:05"],["6","18:05–19:35","—"]]},
+ vsp:{name:"Вторник, среда, пятница",rows:[["1","8:30–10:00","10:00–10:10"],["2","10:10–11:40","11:40–12:10",1],["3","12:10–13:40","13:40–13:50"],["4","13:50–15:20","15:20–15:30"],["5","15:30–17:00","17:00–17:10"],["6","17:10–18:40","18:40–18:50"],["7","18:50–20:20","—"]]},
+ thu:{name:"Четверг",rows:[["1","8:30–10:00","10:00–10:10"],["2","10:10–11:40","11:40–12:10",1],["Классный час","12:10–12:55","12:55–13:00"],["3","13:00–14:30","14:30–14:40"],["4","14:40–16:10","16:10–16:20"],["5","16:20–17:50","17:50–18:00"],["6","18:00–19:30","—"]]}
+};
+const gk=i=>i===0?"mon":i===3?"thu":"vsp";
+const SHORT=["Пн","Вт","Ср","Чт","Пт"];
+let bsel=todayIdx<5?todayIdx:0;
+const mins=s=>{const[h,m]=s.split(":").map(Number);return h*60+m};
+function btable(key,live){
+  const nowM=now.getHours()*60+now.getMinutes();
+  let h=`<table class="bt"><thead><tr><th>Пара</th><th>Занятия</th><th>Перемена</th></tr></thead><tbody>`;
+  G[key].rows.forEach(r=>{
+    const[a,b]=r[1].split("–");
+    const cur=live&&nowM>=mins(a)&&nowM<mins(b);
+    h+=`<tr class="${r[3]?"long ":""}${cur?"cur":""}"><td>${/^\d$/.test(r[0])?r[0]+" пара":r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`;
+  });
+  return h+"</tbody></table>";
+}
+function renderBells(){
+  let t=SHORT.map((s,i)=>`<button data-i="${i}" class="${bsel===i?"on":""}">${s}</button>`).join("");
+  t+=`<button data-i="all" class="${bsel==="all"?"on":""}">Вся неделя</button>`;
+  document.getElementById("tabs").innerHTML=t;
+  let c="";
+  if(bsel==="all"){
+    c=["mon","vsp","thu"].map(k=>`<div class="bh">${G[k].name}</div>`+btable(k,false)).join("");
+  }else{
+    c=`<div class="bh">${DAYS[bsel]}</div>`+btable(gk(bsel),bsel===todayIdx);
+  }
+  document.getElementById("bc").innerHTML=c;
+}
+const dlg=document.getElementById("dlg");
+document.getElementById("bells").onclick=()=>{bsel=todayIdx<5?todayIdx:0;renderBells();dlg.showModal()};
+document.getElementById("x").onclick=()=>dlg.close();
+dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
+document.getElementById("tabs").onclick=e=>{const i=e.target.dataset.i;if(i===undefined)return;bsel=i==="all"?"all":+i;renderBells()};
+// ===== Праздники (производственный календарь РФ 2026, сентябрь–декабрь) =====
+const iso=t=>new Date(t).toISOString().slice(0,10);
+const HOL={"2026-11-04":"День народного единства","2026-12-31":"Выходной день (перенос с 4 января)"};
+function holBox(name,d,has){
+  return `<div class="hb"><div class="hi">🎉</div><b>Занятий нет — праздник</b><div class="t">${name}</div>${has?`<button class="seeb" data-d="${d}">Увидеть расписание на этот день</button>`:""}</div>`;
+}
+const dlg2=document.getElementById("dlg2");
+function openHol(d){
+  const dayT=mon1+(week-1)*7*DAY+d*DAY;
+  document.getElementById("h2t").textContent=DAYS[d]+", "+fmt(dayT);
+  let c=`<div class="t" style="margin-bottom:10px">В этот день занятий нет из-за праздника. Пары, которые должны были быть:</div>`;
+  for(let p=1;p<=5;p++){
+    const ls=L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(week));
+    if(!ls.length)continue;
+    const br=G[gk(d)].rows.find(r=>r[0]===String(p));
+    c+=`<div class="cp"><div class="ct"><b>${p} пара</b><span>${br?br[1]:""}</span></div>`+ls.map(l=>`<div class="les"><b>${l[2]}</b>${l[3]?`<span class="r">каб. ${l[3]}</span>`:""}<div class="t">${l[5]}</div></div>`).join("")+"</div>";
+  }
+  document.getElementById("h2c").innerHTML=c;
+  dlg2.showModal();
+}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".seeb");if(b)openHol(+b.dataset.d)});
+document.getElementById("x2").onclick=()=>dlg2.close();
+dlg2.addEventListener("click",e=>{if(e.target===dlg2)dlg2.close()});
+render();
+</script>
+</body>
+</html>
