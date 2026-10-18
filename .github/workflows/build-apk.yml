@@ -7,10 +7,10 @@ permissions:
   contents: write
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -19,8 +19,12 @@ jobs:
           gradle-version: '8.7'
       - name: Build
         run: gradle assembleDebug --no-daemon
-      - name: Rename
-        run: cp app/build/outputs/apk/debug/app-debug.apk IV234.apk
+      - name: Find APK
+        run: |
+          ls -R app/build/outputs || true
+          APK=$(find . -name "*.apk" | head -n 1)
+          echo "Found: $APK"
+          cp "$APK" IV234.apk
       - uses: actions/upload-artifact@v4
         with:
           name: IV234-apk
