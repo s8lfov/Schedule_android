@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Нужен только для проверки обновлений. Если CHECK_UPDATES = false, эту строку можно удалить -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="ИВ 234"
         android:icon="@mipmap/ic_launcher"
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+        <!-- Отказ от отправки статистики и проверки адресов через Google в WebView -->
+        <meta-data android:name="android.webkit.WebView.MetricsOptOut" android:value="true"/>
+        <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing" android:value="false"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
