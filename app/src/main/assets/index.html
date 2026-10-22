@@ -19,6 +19,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-appl
 .hero .num{font-size:clamp(64px,14vw,120px);font-weight:800;line-height:1;color:var(--accent)}
 .hero .lbl{font-size:clamp(18px,3vw,26px);font-weight:600}
 .hero .sub{color:var(--muted);margin-top:6px;font-size:14px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .nav{display:flex;justify-content:center;gap:8px;margin-top:18px;flex-wrap:wrap}
 button:disabled{opacity:.4;cursor:default}
 button:disabled:hover{border-color:var(--line)}
@@ -65,7 +66,6 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
  #cards{display:block}
  .hero{margin:4px 0 16px}
  .nav button{flex:1 1 30%;padding:11px 8px}
- #bells{flex-basis:100%}
  dialog{padding:12px;width:96vw}
  .bt td,.bt th{padding:6px 5px;font-size:12px}
  .les b{font-size:15px}
@@ -78,10 +78,26 @@ td.hol{text-align:center;vertical-align:middle;background:var(--hl)}
 .seeb{margin-top:6px;background:var(--accent);color:#fff;border-color:var(--accent);font-size:13px;padding:8px 12px}
 .seeb:hover{opacity:.9}
 .dc .hb{padding:6px 0}
+td.now,.cp.now{box-shadow:inset 0 0 0 2px var(--accent);background:var(--hl)}
+td.next,.cp.next{box-shadow:inset 0 0 0 1px var(--accent)}
+td.now::before,td.next::before,.cp.now::before,.cp.next::before{content:attr(data-b);display:block;font-size:11px;font-weight:700;color:var(--accent);margin-bottom:4px}
+#ac input,#ac textarea{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-width:0}
+#ac input[type=checkbox]{width:auto}
+.ar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.ap{margin:10px 0;padding:8px;border:1px solid var(--line);border-radius:10px}
+.lr,.br{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap;align-items:center}
+.lr input{flex:1 1 120px}.br input{flex:1 1 90px}
+.lr input.s,.br input.s{flex:0 0 64px;width:64px}
+#ac textarea{width:100%;font-family:monospace;font-size:12px}
+.am{margin-top:6px;color:var(--accent);font-weight:600}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="top">
+    <button id="bells">🔔 Звонки</button>
+    <button id="admbtn">⚙ Админ</button>
+  </div>
   <div class="hero">
     <div class="num" id="num">–</div>
     <small>Учебная неделя</small>
@@ -94,9 +110,9 @@ td.hol{text-align:center;vertical-align:middle;background:var(--hl)}
     <button id="prev">← Пред. неделя</button>
     <button id="cur">Сегодня</button>
     <button id="next">След. неделя →</button>
-    <button id="bells">🔔 Звонки</button>
   </div>
   <dialog id="dlg"><div class="dh"><b>🔔 Расписание звонков</b><button id="x">✕</button></div><div class="tabs" id="tabs"></div><div id="bc"></div></dialog>
+  <dialog id="dlgA"><div class="dh"><b>⚙ Админ-панель</b><button id="xa">✕</button></div><div id="ac"></div></dialog>
   <dialog id="dlg2"><div class="dh"><b id="h2t"></b><button id="x2">✕</button></div><div id="h2c"></div></dialog>
 </div>
 <script>
@@ -148,19 +164,15 @@ L.forEach(l=>l.w=parseWeeks(l[4]));
 
 const DAY=864e5;
 const utc=d=>Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());
-const now=new Date();
+let now=new Date(),dow,effDay,realWeek,todayIdx,inRange;
 const year=2026; // расписание действует только в 2026 году
 const sep1=new Date(year,8,1);
 const mon1=utc(sep1)-((sep1.getDay()+6)%7)*DAY; // понедельник недели с 1 сентября
-const dow=(now.getDay()+6)%7; // 0=Пн … 6=Вс
-const effDay=utc(now)+(dow>=5?(7-dow)*DAY:0); // в выходные — уже следующая неделя
-const realWeek=Math.floor((effDay-mon1)/DAY/7)+1;
-const todayIdx=(now.getDay()+6)%7; // 0=Пн … 6=Вс
 const START=Date.UTC(2026,8,1), END=Date.UTC(2026,11,31); // период: 1 сентября – 31 декабря 2026
 const maxWeek=Math.floor((END-mon1)/DAY/7)+1; // последняя неделя, начинающаяся в 2026
-const inRange=utc(now)>=START&&utc(now)<=END;
-const home=inRange?realWeek:(utc(now)<START?1:maxWeek);
-let week=home;
+function calcNow(){now=new Date();dow=(now.getDay()+6)%7;effDay=utc(now)+(dow>=5?(7-dow)*DAY:0);realWeek=Math.floor((effDay-mon1)/DAY/7)+1;todayIdx=dow;inRange=utc(now)>=START&&utc(now)<=END}
+const homeW=()=>inRange?realWeek:(utc(now)<START?1:maxWeek);
+calcNow();let week=homeW();
 
 const fmt=t=>new Date(t).toLocaleDateString("ru-RU",{day:"numeric",month:"long",timeZone:"UTC"});
 
@@ -173,10 +185,11 @@ function render(){
   const sub=document.getElementById("sub");
   sub.textContent=(inRange&&week===realWeek?"Текущая неделя · ":"")+"учебный год 2026: с 1 сентября по 31 декабря"+(!inRange?" · сегодня вне периода расписания":"")+(week>17?" · занятий по расписанию нет":"");
   const isCur=inRange&&week===realWeek;
+  const cp=curPair();
   let h="<thead><tr><th class='n'>№</th>";
   DAYS.forEach((d,i)=>{
     const dt=new Date(start+i*DAY);
-    h+=`<th class="${isCur&&i===todayIdx?"today":""}">${d}<br><span style="font-weight:400;font-size:12px">${dt.toLocaleDateString("ru-RU",{day:"numeric",month:"short",timeZone:"UTC"})}</span></th>`;
+    h+=`<th class="${isCur&&i===todayIdx?"today":""}">${d}${OV[iso(start+i*DAY)]?" ✎":""}<br><span style="font-weight:400;font-size:12px">${dt.toLocaleDateString("ru-RU",{day:"numeric",month:"short",timeZone:"UTC"})}</span></th>`;
   });
   h+="</tr></thead><tbody>";
   for(let p=1;p<=5;p++){
@@ -185,12 +198,12 @@ function render(){
       const dayT=start+d*DAY, off=dayT<START||dayT>END;
       const hol=HOL[iso(dayT)];
       if(hol){
-        if(p===1){const n=L.some(l=>l[1]===d&&l.w.has(week));
+        if(p===1){const n=hasLessons(d,mon1+(week-1)*7*DAY+d*DAY);
           h+=`<td rowspan="5" class="hol${isCur&&d===todayIdx?" today":""}">${holBox(hol,d,n)}</td>`;}
         continue;
       }
-      const ls=off?[]:L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(week));
-      h+=`<td class="${isCur&&d===todayIdx?"today":""}${off?" off":""}">`+(ls.length?ls.map(l=>
+      const ls=off?[]:lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
+      h+=`<td class="${isCur&&d===todayIdx?"today":""}${off?" off":""}${cls(cp,d,p)}"${bat(cp,d,p)}>`+(ls.length?ls.map(l=>
         `<div class="les"><b>${l[2]}</b>${l[3]?`<span class="r">каб. ${l[3]}</span>`:""}<div class="t">${l[5]}</div></div>`).join(""):`<div class="empty">—</div>`)+"</td>";
     }
     h+="</tr>";
@@ -201,20 +214,20 @@ function render(){
     const dayT=start+d*DAY, off=dayT<START||dayT>END;
     const hol=HOL[iso(dayT)];
     let body="";
-    if(hol)body=holBox(hol,d,L.some(l=>l[1]===d&&l.w.has(week)));
+    if(hol)body=holBox(hol,d,hasLessons(d,mon1+(week-1)*7*DAY+d*DAY));
     for(let p=1;p<=5;p++){
-      const ls=off?[]:L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(week));
+      const ls=off?[]:lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
       if(!ls.length||hol)continue;
       const br=G[gk(d)].rows.find(r=>r[0]===String(p));
-      body+=`<div class="cp"><div class="ct"><b>${p} пара</b><span>${br?br[1]:""}</span></div>`+ls.map(l=>`<div class="les"><b>${l[2]}</b>${l[3]?`<span class="r">каб. ${l[3]}</span>`:""}<div class="t">${l[5]}</div></div>`).join("")+"</div>";
+      body+=`<div class="cp${cls(cp,d,p)}"${bat(cp,d,p)}><div class="ct"><b>${p} пара</b><span>${br?br[1]:""}</span></div>`+ls.map(l=>`<div class="les"><b>${l[2]}</b>${l[3]?`<span class="r">каб. ${l[3]}</span>`:""}<div class="t">${l[5]}</div></div>`).join("")+"</div>";
     }
-    cs+=`<div class="dc${isCur&&d===todayIdx?" today":""}${off?" off":""}"><div class="dh2"><b>${DAYS[d]}</b><span>${fmt(dayT)}</span></div>${body||'<div class="empty">Занятий нет</div>'}</div>`;
+    cs+=`<div class="dc${isCur&&d===todayIdx?" today":""}${off?" off":""}"><div class="dh2"><b>${DAYS[d]}${OV[iso(dayT)]?" ✎":""}</b><span>${fmt(dayT)}</span></div>${body||'<div class="empty">Занятий нет</div>'}</div>`;
   }
   document.getElementById("cards").innerHTML=cs;
 }
 document.getElementById("prev").onclick=()=>{if(week>1){week--;render()}};
 document.getElementById("next").onclick=()=>{if(week<maxWeek){week++;render()}};
-document.getElementById("cur").onclick=()=>{week=home;render()};
+document.getElementById("cur").onclick=()=>{calcNow();week=homeW();render()};
 // ===== Звонки =====
 const G={
  mon:{name:"Понедельник",rows:[["Поднятие флага","8:15–8:25","по графику"],["Разговоры о важном","8:30–9:15","9:15–9:25"],["1","9:25–10:55","10:55–11:05"],["2","11:05–12:35","12:35–13:05",1],["3","13:05–14:35","14:35–14:45"],["4","14:45–16:15","16:15–16:25"],["5","16:25–17:55","17:55–18:05"],["6","18:05–19:35","—"]]},
@@ -264,7 +277,7 @@ function openHol(d){
   document.getElementById("h2t").textContent=DAYS[d]+", "+fmt(dayT);
   let c=`<div class="t" style="margin-bottom:10px">В этот день занятий нет из-за праздника. Пары, которые должны были быть:</div>`;
   for(let p=1;p<=5;p++){
-    const ls=L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(week));
+    const ls=lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
     if(!ls.length)continue;
     const br=G[gk(d)].rows.find(r=>r[0]===String(p));
     c+=`<div class="cp"><div class="ct"><b>${p} пара</b><span>${br?br[1]:""}</span></div>`+ls.map(l=>`<div class="les"><b>${l[2]}</b>${l[3]?`<span class="r">каб. ${l[3]}</span>`:""}<div class="t">${l[5]}</div></div>`).join("")+"</div>";
@@ -275,6 +288,100 @@ function openHol(d){
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".seeb");if(b)openHol(+b.dataset.d)});
 document.getElementById("x2").onclick=()=>dlg2.close();
 dlg2.addEventListener("click",e=>{if(e.target===dlg2)dlg2.close()});
+// ===== Хранилище, текущая пара, админ-панель =====
+const store={get(k){try{return JSON.parse(localStorage.getItem("iv_"+k))}catch(e){return null}},set(k,v){try{localStorage.setItem("iv_"+k,JSON.stringify(v));return true}catch(e){return false}},del(k){try{localStorage.removeItem("iv_"+k)}catch(e){}}};
+const cp0=o=>JSON.parse(JSON.stringify(o));
+const G0=cp0(G);
+{const sb=store.get("bells");if(sb)Object.assign(G,sb)}
+let OV=store.get("ov")||{};
+const weekOf=t=>Math.floor((t-mon1)/DAY/7)+1;
+function lessonsFor(p,d,t){const o=OV[iso(t)];if(o)return(o[p]||[]).map(x=>[p,d,x[0],x[1],"",x[2]]);return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
+function hasLessons(d,t){return[1,2,3,4,5].some(p=>lessonsFor(p,d,t).length)}
+function curPair(){
+  if(!(inRange&&week===realWeek)||todayIdx>4||HOL[iso(utc(now))])return null;
+  const m=now.getHours()*60+now.getMinutes(),t=utc(now);let nx=null;
+  for(const r of G[gk(todayIdx)].rows){
+    if(!/^\d$/.test(r[0]))continue;
+    const[a,b]=r[1].split("–"),p=+r[0];
+    if(m>=mins(a)&&m<mins(b)&&lessonsFor(p,todayIdx,t).length)return{p,s:"now",t:b};
+    if(m<mins(a)&&!nx&&lessonsFor(p,todayIdx,t).length)nx={p,s:"next",t:a};
+  }
+  return nx;
+}
+const cls=(c,d,p)=>c&&d===todayIdx&&c.p===p?" "+c.s:"";
+const bat=(c,d,p)=>c&&d===todayIdx&&c.p===p?` data-b="${c.s==="now"?"идёт до ":"следующая в "}${c.t}"`:"";
+function tickNow(){const was=week===realWeek;calcNow();if(was)week=homeW();render()}
+setInterval(()=>{if(!document.hidden)tickNow()},30000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)tickNow()});
+
+const dlgA=document.getElementById("dlgA"),ac=document.getElementById("ac");
+let isAdm=false,atab="day",aiso="",edit={},bedit={},amsg="";
+const hsh=s=>{let h=5381;for(const c of s)h=((h<<5)+h+c.charCodeAt(0))|0;return""+h};
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const dIdx=t=>(new Date(t).getUTCDay()+6)%7;
+function defaultIso(){const t=utc(now)+(dow>=5?(7-dow)*DAY:0);return iso(Math.min(Math.max(t,START),END))}
+function loadDay(){const t=Date.parse(aiso+"T00:00:00Z");edit={};if(isNaN(t)||dIdx(t)>4)return;for(let p=1;p<=5;p++)edit[p]=lessonsFor(p,dIdx(t),t).map(l=>[l[2],l[3],l[5]])}
+function dayHtml(){
+  const t=Date.parse(aiso+"T00:00:00Z");
+  let h=`<div class="ar"><input type="date" id="ad" value="${aiso}" min="2026-09-01" max="2026-12-31"></div>`;
+  if(isNaN(t)||dIdx(t)>4)return h+`<div class="t">Выберите будний день.</div>`;
+  h+=`<div class="t">${DAYS[dIdx(t)]}${OV[aiso]?" · изменено вручную":""}${HOL[aiso]?" · праздник: "+HOL[aiso]:""}</div>`;
+  for(let p=1;p<=5;p++)h+=`<div class="ap"><b>${p} пара</b>`+(edit[p]||[]).map((x,i)=>`<div class="lr" data-p="${p}"><input placeholder="Предмет" value="${esc(x[0])}"><input class="s" placeholder="Каб." value="${esc(x[1])}"><input placeholder="Преподаватель" value="${esc(x[2])}"><button data-a="del" data-p="${p}" data-i="${i}">✕</button></div>`).join("")+`<button data-a="add" data-p="${p}">+ добавить</button></div>`;
+  return h+`<div class="ar"><button class="seeb" data-a="saveday">Сохранить день</button><button data-a="resetday">Вернуть по умолчанию</button></div>`;
+}
+function bellsHtml(){
+  return["mon","vsp","thu"].map(k=>`<div class="ap"><b>${G[k].name}</b>`+bedit[k].map((r,i)=>`<div class="br" data-g="${k}"><input class="s" value="${esc(r[0])}" title="№ пары или название"><input value="${esc(r[1])}" placeholder="9:25–10:55"><input value="${esc(r[2])}" placeholder="перемена"><label class="t"><input type="checkbox" ${r[3]?"checked":""}>бол.</label><button data-a="bdel" data-g="${k}" data-i="${i}">✕</button></div>`).join("")+`<button data-a="badd" data-g="${k}">+ строка</button></div>`).join("")+`<div class="ar"><button class="seeb" data-a="savebells">Сохранить звонки</button><button data-a="resetbells">Стандартные</button></div><div class="t">Время: 9:25–10:55. Строки с цифрой в первом поле считаются парами и используются для подсветки текущей пары. «бол.» — большая перемена.</div>`;
+}
+function dataHtml(){
+  return`<div class="t">Изменения хранятся только на этом устройстве. Скопируйте текст, чтобы перенести их на другое устройство, или вставьте сюда новое расписание и нажмите «Загрузить».</div><textarea id="ajson" rows="8">${esc(JSON.stringify({bells:G,ov:OV}))}</textarea><div class="ar"><button class="seeb" data-a="import">Загрузить</button><button data-a="newpin">Сменить PIN</button><button data-a="resetall">Сбросить всё</button></div>`;
+}
+function drawAdmin(){
+  if(!isAdm){
+    ac.innerHTML=`<div class="t">${store.get("pin")?"Введите PIN":"Придумайте PIN (защита условная: данные хранятся на устройстве)"}</div><div class="ar"><input id="pin" type="password" inputmode="numeric" maxlength="8"><button data-a="pin">ОК</button></div><div class="am">${amsg}</div>`;return;
+  }
+  const tabs=[["day","Пары на день"],["bells","Звонки"],["data","Данные"]].map(([k,n])=>`<button data-a="tab" data-k="${k}" class="${atab===k?"on":""}">${n}</button>`).join("");
+  ac.innerHTML=`<div class="tabs">${tabs}</div>${atab==="day"?dayHtml():atab==="bells"?bellsHtml():dataHtml()}<div class="am">${amsg}</div>`;
+}
+function collect(){
+  if(atab==="day"){const e={};for(let p=1;p<=5;p++)e[p]=[];ac.querySelectorAll(".lr").forEach(r=>{const i=r.querySelectorAll("input");e[r.dataset.p].push([i[0].value.trim(),i[1].value.trim(),i[2].value.trim()])});edit=e}
+  else if(atab==="bells"){const e={mon:[],vsp:[],thu:[]};ac.querySelectorAll(".br").forEach(r=>{const i=r.querySelectorAll("input"),row=[i[0].value.trim(),i[1].value.trim(),i[2].value.trim()];if(i[3].checked)row.push(1);e[r.dataset.g].push(row)});bedit=e}
+}
+function enter(){isAdm=true;aiso=defaultIso();loadDay()}
+ac.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b||!b.dataset.a)return;
+  const a=b.dataset.a;amsg="";
+  if(isAdm&&a!=="resetall"&&a!=="import")collect();
+  if(a==="pin"){const v=document.getElementById("pin").value;
+    if(!v)amsg="Введите PIN";
+    else if(!store.get("pin")){if(store.set("pin",hsh(v)))enter();else amsg="Не удалось сохранить PIN"}
+    else if(hsh(v)===store.get("pin"))enter();else amsg="Неверный PIN";}
+  else if(a==="tab"){atab=b.dataset.k;if(atab==="day")loadDay();if(atab==="bells")bedit={mon:cp0(G.mon.rows),vsp:cp0(G.vsp.rows),thu:cp0(G.thu.rows)}}
+  else if(a==="add")edit[b.dataset.p].push(["","",""]);
+  else if(a==="del")edit[b.dataset.p].splice(+b.dataset.i,1);
+  else if(a==="saveday"){const o={};for(let p=1;p<=5;p++)o[p]=edit[p].filter(x=>x[0]);OV[aiso]=o;amsg=store.set("ov",OV)?"Сохранено":"Не удалось сохранить";render()}
+  else if(a==="resetday"){delete OV[aiso];store.set("ov",OV);loadDay();amsg="Возвращено по умолчанию";render()}
+  else if(a==="badd")bedit[b.dataset.g].push(["","",""]);
+  else if(a==="bdel")bedit[b.dataset.g].splice(+b.dataset.i,1);
+  else if(a==="savebells"){
+    for(const k in bedit)for(const r of bedit[k]){if(!r[0]&&!r[1])continue;r[1]=r[1].replace(/\s/g,"").replace(/[-—]/,"–");if(!/^\d{1,2}:\d{2}–\d{1,2}:\d{2}$/.test(r[1])){amsg="Неверное время в строке «"+r[0]+"»";break}}
+    if(!amsg){for(const k in bedit)G[k].rows=bedit[k].filter(r=>r[0]&&r[1]);amsg=store.set("bells",G)?"Звонки сохранены":"Не удалось сохранить";render()}}
+  else if(a==="resetbells"){["mon","vsp","thu"].forEach(k=>G[k].rows=cp0(G0[k].rows));store.del("bells");bedit={mon:cp0(G.mon.rows),vsp:cp0(G.vsp.rows),thu:cp0(G.thu.rows)};amsg="Стандартные звонки";render()}
+  else if(a==="import"){try{
+    const j=JSON.parse(document.getElementById("ajson").value);
+    if(j.bells){for(const k of["mon","vsp","thu"])if(!j.bells[k]||!Array.isArray(j.bells[k].rows))throw 0;Object.assign(G,j.bells);store.set("bells",G)}
+    if(j.ov&&typeof j.ov==="object"){OV=j.ov;store.set("ov",OV)}
+    amsg="Загружено";render()}catch(x){amsg="Неверный формат данных"}}
+  else if(a==="newpin"){store.del("pin");isAdm=false}
+  else if(a==="resetall"){
+    if(!b.dataset.c){b.dataset.c=1;b.textContent="Нажмите ещё раз";return}
+    ["mon","vsp","thu"].forEach(k=>G[k].rows=cp0(G0[k].rows));OV={};store.del("bells");store.del("ov");amsg="Всё сброшено";render()}
+  drawAdmin();
+});
+ac.addEventListener("change",e=>{if(e.target.id==="ad"){aiso=e.target.value;amsg="";loadDay();drawAdmin()}});
+document.getElementById("admbtn").onclick=()=>{amsg="";isAdm=false;drawAdmin();dlgA.showModal()};
+document.getElementById("xa").onclick=()=>dlgA.close();
+dlgA.addEventListener("click",e=>{if(e.target===dlgA)dlgA.close()});
+dlgA.addEventListener("close",()=>{isAdm=false});
 render();
 </script>
 </body>

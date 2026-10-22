@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
         web = new WebView(this);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);          // нужен для расчёта недели
-        s.setDomStorageEnabled(false);
+        s.setDomStorageEnabled(true);          // хранение правок из админ-панели на устройстве
         s.setBlockNetworkLoads(true);          // WebView физически не может ходить в сеть
         s.setAllowFileAccess(false);           // доступ к файлам телефона закрыт (assets работают)
         s.setAllowContentAccess(false);
@@ -122,7 +122,11 @@ public class MainActivity extends Activity {
                 String tag = new JSONObject(sb.toString()).getString("tag_name");
                 String current = getPackageManager()
                         .getPackageInfo(getPackageName(), 0).versionName;
-                if (isNewer(tag, current)) runOnUiThread(() -> showDialog(tag));
+                // показываем окно один раз для каждой новой версии
+                if (isNewer(tag, current) && !tag.equals(p.getString("notified", ""))) {
+                    p.edit().putString("notified", tag).apply();
+                    runOnUiThread(() -> showDialog(tag));
+                }
             } catch (Exception ignored) {
                 // нет интернета или лимит GitHub — молча пропускаем
             } finally {
@@ -155,7 +159,10 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        // сначала закрываем открытое окно (звонки/админ-панель), иначе выходим
+        web.evaluateJavascript(
+                "(function(){var d=document.querySelector('dialog[open]');if(d){d.close();return 1}return 0})()",
+                v -> { if (!"1".equals(v)) MainActivity.super.onBackPressed(); });
     }
 
     @Override
