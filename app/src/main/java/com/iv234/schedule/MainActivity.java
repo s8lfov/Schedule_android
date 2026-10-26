@@ -119,7 +119,7 @@ public class MainActivity extends Activity {
         new Thread(() -> {
             HttpURLConnection c = null;
             try {
-                URL u = new URL(DATA_URL + "?t=" + (System.currentTimeMillis() / 60000));
+                URL u = new URL(DATA_URL + "?t=" + System.currentTimeMillis());
                 if (!"https".equals(u.getProtocol()) || !DATA_HOST.equals(u.getHost())) return;
                 c = (HttpURLConnection) u.openConnection();
                 c.setInstanceFollowRedirects(false);   // не идём по перенаправлениям
@@ -142,7 +142,10 @@ public class MainActivity extends Activity {
                 }
                 String clean = StateValidator.sanitize(bo.toString("UTF-8"));
                 if (clean == null) return;             // не прошло проверку — остаётся старая копия
-                getSharedPreferences("s", MODE_PRIVATE).edit().putString("state", clean).apply();
+                SharedPreferences sp = getSharedPreferences("s", MODE_PRIVATE);
+                String old = sp.getString("state", null);
+                if (old != null && !isNewerState(clean, old)) return; // устаревшая копия из кэша — игнорируем
+                sp.edit().putString("state", clean).apply();
                 runOnUiThread(() -> pushState(clean));
             } catch (Exception ignored) {
                 // нет интернета — продолжаем работать с последней сохранённой копией
@@ -205,6 +208,17 @@ public class MainActivity extends Activity {
                 if (c != null) c.disconnect();
             }
         }).start();
+    }
+
+    private static boolean isNewerState(String a, String b) {
+        try {
+            JSONObject x = new JSONObject(a), y = new JSONObject(b);
+            String ax = x.optString("at", ""), ay = y.optString("at", "");
+            if (!ax.isEmpty() && !ay.isEmpty()) return ax.compareTo(ay) > 0;
+            return x.optInt("rev", 0) > y.optInt("rev", 0);
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     private static boolean isNewer(String latest, String current) {

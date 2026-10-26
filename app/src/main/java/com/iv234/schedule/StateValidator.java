@@ -19,6 +19,8 @@ final class StateValidator {
             if (rev < 0) return null;
             JSONObject out = new JSONObject();
             out.put("rev", rev);
+            String at = in.optString("at", "");
+            if (!at.isEmpty()) out.put("at", str(at, 40));
             if (!in.has("bells")) return out.toString(); // пустое состояние: действует базовое расписание
 
             JSONObject bells = in.getJSONObject("bells");

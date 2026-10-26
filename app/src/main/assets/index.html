@@ -324,28 +324,30 @@ const ADMINS=["s8lfov","deft-airspace"];
 const DATA_URL="https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_BRANCH+"/"+GH_FILE;
 const ghH=t=>({"Authorization":"Bearer "+t,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"});
 const IN_APP=location.protocol==="file:"; // внутри APK данные приходят только из приложения
-let OV={},SH={},rev=0,tok=null,tuser="";
+let OV={},SH={},rev=0,stAt="",tok=null,tuser="";
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const lg=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const ls=(k,v)=>{try{v===undefined?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 function applyState(s){
   if(!s||typeof s!=="object")return false;
   for(const k of["mon","vsp","thu"]){const g=s.bells&&s.bells[k];G[k].rows=g&&Array.isArray(g.rows)?cp0(g.rows):cp0(G0[k].rows)}
-  OV=s.ov&&typeof s.ov==="object"?s.ov:{};SH=s.sh&&typeof s.sh==="object"?s.sh:{};rev=+s.rev||0;return true;
+  OV=s.ov&&typeof s.ov==="object"?s.ov:{};SH=s.sh&&typeof s.sh==="object"?s.sh:{};rev=+s.rev||0;stAt=s.at||"";return true;
 }
 applyState(lg("iv_state"));
 let MY=lg("iv_my")||{}; // личные правки пользователя (только на этом устройстве)
 {const t=lg("iv_gh");if(t&&t.token){tok=t.token;tuser=t.user}}
+// принимаем только БОЛЕЕ НОВОЕ состояние: устаревшие копии из кэша GitHub игнорируются
+const newer=s=>{const a=s.at||"";return a&&stAt?a>stAt:(+s.rev||0)>rev};
 async function pull(){
   if(IN_APP)return;
   try{
-    const r=await fetch(DATA_URL+"?t="+Math.floor(Date.now()/60000),{cache:"no-store"});
+    const r=await fetch(DATA_URL+"?t="+Date.now(),{cache:"no-store"});
     if(!r.ok)return; // файла ещё нет или GitHub недоступен — остаётся то, что уже показано
     const s=await r.json();
-    if((+s.rev||0)!==rev){applyState(s);ls("iv_state",s);render()}
+    if(newer(s)){applyState(s);ls("iv_state",s);render()}
   }catch(e){}
 }
-window.__setState=t=>{try{applyState(JSON.parse(t));render()}catch(e){}};
+window.__setState=t=>{try{const s=JSON.parse(t);if(newer(s)){applyState(s);render()}}catch(e){}};
 const lesHtml=l=>`<div class="les"><b>${esc(l[2])}</b>${l[3]?`<span class="r">каб. ${esc(l[3])}</span>`:""}<div class="t">${esc(l[5])}</div>${SH[l[2]+"|"+l[5]]?'<span class="shoe">👟 нужна сменка</span>':""}</div>`;
 const weekOf=t=>Math.floor((t-mon1)/DAY/7)+1;
 function lessonsFor(p,d,t,noMy){const o=(!noMy&&MY[iso(t)])||OV[iso(t)];if(o)return(o[p]||[]).map(x=>[p,d,x[0],x[1],"",x[2]]);return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
@@ -378,7 +380,7 @@ const b64e=t=>btoa(unescape(encodeURIComponent(t)));
 const b64d=t=>decodeURIComponent(escape(atob(t.replace(/\s/g,""))));
 async function push(){
   const url="https://api.github.com/repos/"+GH_REPO+"/contents/"+GH_FILE;
-  const revert=async()=>{rev=-1;await pull()};
+  const revert=async()=>{rev=-1;stAt="";await pull()};
   try{
     const g=await fetch(url+"?ref="+GH_BRANCH+"&t="+Date.now(),{headers:ghH(tok),cache:"no-store"});
     if(g.status===401){tok=null;ls("iv_gh");await revert();return"Токен недействителен — войдите снова"}
