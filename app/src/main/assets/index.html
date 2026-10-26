@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
 <title>Расписание ИВ 234</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d28d9'/%3E%3Ctext x='50' y='46' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='700' font-size='38' fill='white'%3EIV%3C/text%3E%3Ctext x='50' y='84' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='700' font-size='38' fill='white'%3E234%3C/text%3E%3C/svg%3E">
 <style>
@@ -90,6 +90,8 @@ td.now::before,td.next::before,.cp.now::before,.cp.next::before{content:attr(dat
 .lr input.s,.br input.s{flex:0 0 64px;width:64px}
 #ac textarea{width:100%;font-family:monospace;font-size:12px}
 .am{margin-top:6px;color:var(--accent);font-weight:600}
+.shoe{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;background:var(--hl);color:var(--accent);font-size:12px;font-weight:600}
+.tg{display:flex;gap:8px;align-items:center;margin:8px 0}
 </style>
 </head>
 <body>
@@ -204,7 +206,7 @@ function render(){
       }
       const ls=off?[]:lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
       h+=`<td class="${isCur&&d===todayIdx?"today":""}${off?" off":""}${cls(cp,d,p)}"${bat(cp,d,p)}>`+(ls.length?ls.map(l=>
-        `<div class="les"><b>${l[2]}</b>${l[3]?`<span class="r">каб. ${l[3]}</span>`:""}<div class="t">${l[5]}</div></div>`).join(""):`<div class="empty">—</div>`)+"</td>";
+        `${lesHtml(l)}`).join(""):`<div class="empty">—</div>`)+"</td>";
     }
     h+="</tr>";
   }
@@ -219,7 +221,7 @@ function render(){
       const ls=off?[]:lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
       if(!ls.length||hol)continue;
       const br=G[gk(d)].rows.find(r=>r[0]===String(p));
-      body+=`<div class="cp${cls(cp,d,p)}"${bat(cp,d,p)}><div class="ct"><b>${p} пара</b><span>${br?br[1]:""}</span></div>`+ls.map(l=>`<div class="les"><b>${l[2]}</b>${l[3]?`<span class="r">каб. ${l[3]}</span>`:""}<div class="t">${l[5]}</div></div>`).join("")+"</div>";
+      body+=`<div class="cp${cls(cp,d,p)}"${bat(cp,d,p)}><div class="ct"><b>${p} пара</b><span>${br?esc(br[1]):""}</span></div>`+ls.map(l=>`${lesHtml(l)}`).join("")+"</div>";
     }
     cs+=`<div class="dc${isCur&&d===todayIdx?" today":""}${off?" off":""}"><div class="dh2"><b>${DAYS[d]}${OV[iso(dayT)]?" ✎":""}</b><span>${fmt(dayT)}</span></div>${body||'<div class="empty">Занятий нет</div>'}</div>`;
   }
@@ -244,7 +246,7 @@ function btable(key,live){
   G[key].rows.forEach(r=>{
     const[a,b]=r[1].split("–");
     const cur=live&&nowM>=mins(a)&&nowM<mins(b);
-    h+=`<tr class="${r[3]?"long ":""}${cur?"cur":""}"><td>${/^\d$/.test(r[0])?r[0]+" пара":r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`;
+    h+=`<tr class="${r[3]?"long ":""}${cur?"cur":""}"><td>${/^\d$/.test(r[0])?esc(r[0])+" пара":esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`;
   });
   return h+"</tbody></table>";
 }
@@ -254,7 +256,7 @@ function renderBells(){
   document.getElementById("tabs").innerHTML=t;
   let c="";
   if(bsel==="all"){
-    c=["mon","vsp","thu"].map(k=>`<div class="bh">${G[k].name}</div>`+btable(k,false)).join("");
+    c=["mon","vsp","thu"].map(k=>`<div class="bh">${esc(G[k].name)}</div>`+btable(k,false)).join("");
   }else{
     c=`<div class="bh">${DAYS[bsel]}</div>`+btable(gk(bsel),bsel===todayIdx);
   }
@@ -280,7 +282,7 @@ function openHol(d){
     const ls=lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
     if(!ls.length)continue;
     const br=G[gk(d)].rows.find(r=>r[0]===String(p));
-    c+=`<div class="cp"><div class="ct"><b>${p} пара</b><span>${br?br[1]:""}</span></div>`+ls.map(l=>`<div class="les"><b>${l[2]}</b>${l[3]?`<span class="r">каб. ${l[3]}</span>`:""}<div class="t">${l[5]}</div></div>`).join("")+"</div>";
+    c+=`<div class="cp"><div class="ct"><b>${p} пара</b><span>${br?esc(br[1]):""}</span></div>`+ls.map(l=>`${lesHtml(l)}`).join("")+"</div>";
   }
   document.getElementById("h2c").innerHTML=c;
   dlg2.showModal();
@@ -288,12 +290,37 @@ function openHol(d){
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".seeb");if(b)openHol(+b.dataset.d)});
 document.getElementById("x2").onclick=()=>dlg2.close();
 dlg2.addEventListener("click",e=>{if(e.target===dlg2)dlg2.close()});
-// ===== Хранилище, текущая пара, админ-панель =====
-const store={get(k){try{return JSON.parse(localStorage.getItem("iv_"+k))}catch(e){return null}},set(k,v){try{localStorage.setItem("iv_"+k,JSON.stringify(v));return true}catch(e){return false}},del(k){try{localStorage.removeItem("iv_"+k)}catch(e){}}};
+// ===== Состояние с сервера, текущая пара, админ-панель =====
 const cp0=o=>JSON.parse(JSON.stringify(o));
 const G0=cp0(G);
-{const sb=store.get("bells");if(sb)Object.assign(G,sb)}
-let OV=store.get("ov")||{};
+// Данные расписания лежат в файле schedule.json в репозитории GitHub (репозиторий должен быть публичным).
+const GH_REPO="s8lfov/Schedule_android",GH_BRANCH="main",GH_FILE="schedule.json";
+const ADMINS=["s8lfov","deft-airspace"];
+const DATA_URL="https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_BRANCH+"/"+GH_FILE;
+const ghH=t=>({"Authorization":"Bearer "+t,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"});
+const IN_APP=location.protocol==="file:"; // внутри APK данные приходят только из приложения
+let OV={},SH={},rev=0,tok=null,tuser="";
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const lg=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const ls=(k,v)=>{try{v===undefined?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+function applyState(s){
+  if(!s||typeof s!=="object")return false;
+  for(const k of["mon","vsp","thu"]){const g=s.bells&&s.bells[k];G[k].rows=g&&Array.isArray(g.rows)?cp0(g.rows):cp0(G0[k].rows)}
+  OV=s.ov&&typeof s.ov==="object"?s.ov:{};SH=s.sh&&typeof s.sh==="object"?s.sh:{};rev=+s.rev||0;return true;
+}
+applyState(lg("iv_state"));
+{const t=lg("iv_gh");if(t&&t.token){tok=t.token;tuser=t.user}}
+async function pull(){
+  if(IN_APP)return;
+  try{
+    const r=await fetch(DATA_URL+"?t="+Math.floor(Date.now()/60000),{cache:"no-store"});
+    if(!r.ok)return; // файла ещё нет или GitHub недоступен — остаётся то, что уже показано
+    const s=await r.json();
+    if((+s.rev||0)!==rev){applyState(s);ls("iv_state",s);render()}
+  }catch(e){}
+}
+window.__setState=t=>{try{applyState(JSON.parse(t));render()}catch(e){}};
+const lesHtml=l=>`<div class="les"><b>${esc(l[2])}</b>${l[3]?`<span class="r">каб. ${esc(l[3])}</span>`:""}<div class="t">${esc(l[5])}</div>${SH[l[2]+"|"+l[5]]?'<span class="shoe">👟 нужна сменка</span>':""}</div>`;
 const weekOf=t=>Math.floor((t-mon1)/DAY/7)+1;
 function lessonsFor(p,d,t){const o=OV[iso(t)];if(o)return(o[p]||[]).map(x=>[p,d,x[0],x[1],"",x[2]]);return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
 function hasLessons(d,t){return[1,2,3,4,5].some(p=>lessonsFor(p,d,t).length)}
@@ -309,80 +336,124 @@ function curPair(){
   return nx;
 }
 const cls=(c,d,p)=>c&&d===todayIdx&&c.p===p?" "+c.s:"";
-const bat=(c,d,p)=>c&&d===todayIdx&&c.p===p?` data-b="${c.s==="now"?"идёт до ":"следующая в "}${c.t}"`:"";
+const bat=(c,d,p)=>c&&d===todayIdx&&c.p===p?` data-b="${c.s==="now"?"идёт до ":"следующая в "}${esc(c.t)}"`:"";
 function tickNow(){const was=week===realWeek;calcNow();if(was)week=homeW();render()}
 setInterval(()=>{if(!document.hidden)tickNow()},30000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)tickNow()});
 
+setInterval(()=>{if(!document.hidden)pull()},90000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
+pull();
+const b64e=t=>btoa(unescape(encodeURIComponent(t)));
+const b64d=t=>decodeURIComponent(escape(atob(t.replace(/\s/g,""))));
+async function push(){
+  const url="https://api.github.com/repos/"+GH_REPO+"/contents/"+GH_FILE;
+  const revert=async()=>{rev=-1;await pull()};
+  try{
+    const g=await fetch(url+"?ref="+GH_BRANCH+"&t="+Date.now(),{headers:ghH(tok),cache:"no-store"});
+    if(g.status===401){tok=null;ls("iv_gh");await revert();return"Токен недействителен — войдите снова"}
+    let sha,srv=null;
+    if(g.ok){const j=await g.json();sha=j.sha;try{srv=JSON.parse(b64d(j.content))}catch(e){srv=null}}
+    else if(g.status!==404){await revert();return"Ошибка чтения ("+g.status+")"}
+    const cur=srv?(+srv.rev||0):0;
+    if(cur!==rev){if(srv){applyState(srv);ls("iv_state",srv);render()}return"Расписание только что изменил другой админ. Данные обновлены — повторите правку"}
+    const next={rev:cur+1,bells:{mon:G.mon,vsp:G.vsp,thu:G.thu},ov:OV,sh:SH,by:tuser,at:new Date().toISOString()};
+    const body={message:"Расписание: правка от "+tuser,content:b64e(JSON.stringify(next)),branch:GH_BRANCH};
+    if(sha)body.sha=sha;
+    const p=await fetch(url,{method:"PUT",headers:{...ghH(tok),"Content-Type":"application/json"},body:JSON.stringify(body)});
+    if(p.status===409||p.status===422){await revert();return"Конфликт сохранения — повторите правку"}
+    if(p.status===403||p.status===404){await revert();return"Нет прав на запись. У токена должно быть разрешение Contents: Read and write"}
+    if(!p.ok){await revert();return"Ошибка сохранения ("+p.status+")"}
+    applyState(next);ls("iv_state",next);render();
+    return"Сохранено. У друзей обновится в течение пары минут";
+  }catch(e){return"Нет связи с GitHub"}
+}
 const dlgA=document.getElementById("dlgA"),ac=document.getElementById("ac");
-let isAdm=false,atab="day",aiso="",edit={},bedit={},amsg="";
-const hsh=s=>{let h=5381;for(const c of s)h=((h<<5)+h+c.charCodeAt(0))|0;return""+h};
-const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let atab="day",aiso="",edit={},bedit={},she={},amsg="";
 const dIdx=t=>(new Date(t).getUTCDay()+6)%7;
 function defaultIso(){const t=utc(now)+(dow>=5?(7-dow)*DAY:0);return iso(Math.min(Math.max(t,START),END))}
 function loadDay(){const t=Date.parse(aiso+"T00:00:00Z");edit={};if(isNaN(t)||dIdx(t)>4)return;for(let p=1;p<=5;p++)edit[p]=lessonsFor(p,dIdx(t),t).map(l=>[l[2],l[3],l[5]])}
 function dayHtml(){
   const t=Date.parse(aiso+"T00:00:00Z");
-  let h=`<div class="ar"><input type="date" id="ad" value="${aiso}" min="2026-09-01" max="2026-12-31"></div>`;
+  let h=`<div class="ar"><input type="date" id="ad" value="${esc(aiso)}" min="2026-09-01" max="2026-12-31"></div>`;
   if(isNaN(t)||dIdx(t)>4)return h+`<div class="t">Выберите будний день.</div>`;
   h+=`<div class="t">${DAYS[dIdx(t)]}${OV[aiso]?" · изменено вручную":""}${HOL[aiso]?" · праздник: "+HOL[aiso]:""}</div>`;
-  for(let p=1;p<=5;p++)h+=`<div class="ap"><b>${p} пара</b>`+(edit[p]||[]).map((x,i)=>`<div class="lr" data-p="${p}"><input placeholder="Предмет" value="${esc(x[0])}"><input class="s" placeholder="Каб." value="${esc(x[1])}"><input placeholder="Преподаватель" value="${esc(x[2])}"><button data-a="del" data-p="${p}" data-i="${i}">✕</button></div>`).join("")+`<button data-a="add" data-p="${p}">+ добавить</button></div>`;
+  for(let p=1;p<=5;p++)h+=`<div class="ap"><b>${p} пара</b>`+(edit[p]||[]).map((x,i)=>`<div class="lr" data-p="${p}"><input placeholder="Предмет" maxlength="100" value="${esc(x[0])}"><input class="s" placeholder="Каб." maxlength="30" value="${esc(x[1])}"><input placeholder="Преподаватель" maxlength="100" value="${esc(x[2])}"><button data-a="del" data-p="${p}" data-i="${i}">✕</button></div>`).join("")+`<button data-a="add" data-p="${p}">+ добавить</button></div>`;
   return h+`<div class="ar"><button class="seeb" data-a="saveday">Сохранить день</button><button data-a="resetday">Вернуть по умолчанию</button></div>`;
 }
 function bellsHtml(){
-  return["mon","vsp","thu"].map(k=>`<div class="ap"><b>${G[k].name}</b>`+bedit[k].map((r,i)=>`<div class="br" data-g="${k}"><input class="s" value="${esc(r[0])}" title="№ пары или название"><input value="${esc(r[1])}" placeholder="9:25–10:55"><input value="${esc(r[2])}" placeholder="перемена"><label class="t"><input type="checkbox" ${r[3]?"checked":""}>бол.</label><button data-a="bdel" data-g="${k}" data-i="${i}">✕</button></div>`).join("")+`<button data-a="badd" data-g="${k}">+ строка</button></div>`).join("")+`<div class="ar"><button class="seeb" data-a="savebells">Сохранить звонки</button><button data-a="resetbells">Стандартные</button></div><div class="t">Время: 9:25–10:55. Строки с цифрой в первом поле считаются парами и используются для подсветки текущей пары. «бол.» — большая перемена.</div>`;
+  return["mon","vsp","thu"].map(k=>`<div class="ap"><b>${esc(G[k].name)}</b>`+bedit[k].map((r,i)=>`<div class="br" data-g="${k}"><input class="s" value="${esc(r[0])}" title="№ пары или название"><input value="${esc(r[1])}" placeholder="9:25–10:55"><input value="${esc(r[2])}" placeholder="перемена"><label class="t"><input type="checkbox" ${r[3]?"checked":""}>бол.</label><button data-a="bdel" data-g="${k}" data-i="${i}">✕</button></div>`).join("")+`<button data-a="badd" data-g="${k}">+ строка</button></div>`).join("")+`<div class="ar"><button class="seeb" data-a="savebells">Сохранить звонки</button><button data-a="resetbells">Стандартные</button></div><div class="t">Время: 9:25–10:55. Строки с цифрой в первом поле считаются парами и используются для подсветки текущей пары.</div>`;
+}
+function tagsHtml(){
+  const m=new Map();
+  L.forEach(l=>m.set(l[2]+"|"+l[5],[l[2],l[5]]));
+  Object.values(OV).forEach(d=>{for(const p in d)d[p].forEach(x=>m.set(x[0]+"|"+x[2],[x[0],x[2]]))});
+  return`<div class="t">Метка «нужна сменка» привязана к предмету и преподавателю: она показывается у всех пар с таким сочетанием.</div>`+[...m].sort((a,b)=>a[0].localeCompare(b[0],"ru")).map(([k,v])=>`<label class="tg"><input type="checkbox" data-k="${esc(k)}" ${she[k]?"checked":""}><span><b>${esc(v[0])}</b> · ${esc(v[1])}</span></label>`).join("")+`<div class="ar"><button class="seeb" data-a="savetags">Сохранить метки</button></div>`;
 }
 function dataHtml(){
-  return`<div class="t">Изменения хранятся только на этом устройстве. Скопируйте текст, чтобы перенести их на другое устройство, или вставьте сюда новое расписание и нажмите «Загрузить».</div><textarea id="ajson" rows="8">${esc(JSON.stringify({bells:G,ov:OV}))}</textarea><div class="ar"><button class="seeb" data-a="import">Загрузить</button><button data-a="newpin">Сменить PIN</button><button data-a="resetall">Сбросить всё</button></div>`;
+  return`<div class="t">Здесь можно скопировать всё расписание текстом (резервная копия) или вставить новое и нажать «Загрузить».</div><textarea id="ajson" rows="8">${esc(JSON.stringify({bells:{mon:G.mon,vsp:G.vsp,thu:G.thu},ov:OV,sh:SH}))}</textarea><div class="ar"><button class="seeb" data-a="import">Загрузить</button><button data-a="resetall">Сбросить всё</button><button data-a="logout">Выйти</button></div>`;
 }
 function drawAdmin(){
-  if(!isAdm){
-    ac.innerHTML=`<div class="t">${store.get("pin")?"Введите PIN":"Придумайте PIN (защита условная: данные хранятся на устройстве)"}</div><div class="ar"><input id="pin" type="password" inputmode="numeric" maxlength="8"><button data-a="pin">ОК</button></div><div class="am">${amsg}</div>`;return;
-  }
-  const tabs=[["day","Пары на день"],["bells","Звонки"],["data","Данные"]].map(([k,n])=>`<button data-a="tab" data-k="${k}" class="${atab===k?"on":""}">${n}</button>`).join("");
-  ac.innerHTML=`<div class="tabs">${tabs}</div>${atab==="day"?dayHtml():atab==="bells"?bellsHtml():dataHtml()}<div class="am">${amsg}</div>`;
+  if(!tok){ac.innerHTML=`<div class="t">Вход для администраторов (${ADMINS.join(", ")}). Вставьте токен доступа GitHub — он запоминается на этом устройстве.</div><div class="t"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Создать токен</a>: доступ только к репозиторию «${esc(GH_REPO.split("/")[1])}», право Contents → Read and write.</div><div class="ar"><input id="lp" type="password" placeholder="Токен GitHub" autocomplete="off"><button data-a="login">Войти</button></div><div class="am">${esc(amsg)}</div>`;return}
+  const tabs=[["day","Пары на день"],["tags","Метки"],["bells","Звонки"],["data","Данные"]].map(([k,n])=>`<button data-a="tab" data-k="${k}" class="${atab===k?"on":""}">${n}</button>`).join("");
+  ac.innerHTML=`<div class="t">Вы вошли как <b>${esc(tuser)}</b></div><div class="tabs">${tabs}</div>${atab==="day"?dayHtml():atab==="bells"?bellsHtml():atab==="tags"?tagsHtml():dataHtml()}<div class="am">${esc(amsg)}</div>`;
 }
 function collect(){
   if(atab==="day"){const e={};for(let p=1;p<=5;p++)e[p]=[];ac.querySelectorAll(".lr").forEach(r=>{const i=r.querySelectorAll("input");e[r.dataset.p].push([i[0].value.trim(),i[1].value.trim(),i[2].value.trim()])});edit=e}
   else if(atab==="bells"){const e={mon:[],vsp:[],thu:[]};ac.querySelectorAll(".br").forEach(r=>{const i=r.querySelectorAll("input"),row=[i[0].value.trim(),i[1].value.trim(),i[2].value.trim()];if(i[3].checked)row.push(1);e[r.dataset.g].push(row)});bedit=e}
+  else if(atab==="tags"){const n={};ac.querySelectorAll(".tg input").forEach(i=>{if(i.checked)n[i.dataset.k]=1});she=n}
 }
-function enter(){isAdm=true;aiso=defaultIso();loadDay()}
-ac.addEventListener("click",e=>{
+const bellsCopy=()=>({mon:cp0(G.mon.rows),vsp:cp0(G.vsp.rows),thu:cp0(G.thu.rows)});
+ac.addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b||!b.dataset.a)return;
   const a=b.dataset.a;amsg="";
-  if(isAdm&&a!=="resetall"&&a!=="import")collect();
-  if(a==="pin"){const v=document.getElementById("pin").value;
-    if(!v)amsg="Введите PIN";
-    else if(!store.get("pin")){if(store.set("pin",hsh(v)))enter();else amsg="Не удалось сохранить PIN"}
-    else if(hsh(v)===store.get("pin"))enter();else amsg="Неверный PIN";}
-  else if(a==="tab"){atab=b.dataset.k;if(atab==="day")loadDay();if(atab==="bells")bedit={mon:cp0(G.mon.rows),vsp:cp0(G.vsp.rows),thu:cp0(G.thu.rows)}}
+  if(a==="login"){
+    const t=document.getElementById("lp").value.trim();
+    try{
+      const r=await fetch("https://api.github.com/user",{headers:ghH(t)});
+      if(!r.ok)amsg=r.status===401?"Токен не подошёл":"Ошибка GitHub ("+r.status+")";
+      else{
+        const u=(await r.json()).login||"";
+        if(!ADMINS.includes(u.toLowerCase()))amsg="Аккаунт "+u+" не входит в список админов";
+        else{
+          const rr=await fetch("https://api.github.com/repos/"+GH_REPO,{headers:ghH(t)});
+          const info=rr.ok?await rr.json():null;
+          if(!info||!info.permissions||!info.permissions.push)amsg="У аккаунта нет права записи в репозиторий";
+          else{tok=t;tuser=u;ls("iv_gh",{token:t,user:u});aiso=defaultIso();loadDay();she=cp0(SH)}
+        }
+      }
+    }catch(x){amsg="Нет связи с GitHub"}
+    drawAdmin();return;
+  }
+  if(tok&&a!=="resetall"&&a!=="import"&&a!=="logout")collect();
+  if(a==="tab"){atab=b.dataset.k;if(atab==="day")loadDay();if(atab==="bells")bedit=bellsCopy();if(atab==="tags")she=cp0(SH)}
   else if(a==="add")edit[b.dataset.p].push(["","",""]);
   else if(a==="del")edit[b.dataset.p].splice(+b.dataset.i,1);
-  else if(a==="saveday"){const o={};for(let p=1;p<=5;p++)o[p]=edit[p].filter(x=>x[0]);OV[aiso]=o;amsg=store.set("ov",OV)?"Сохранено":"Не удалось сохранить";render()}
-  else if(a==="resetday"){delete OV[aiso];store.set("ov",OV);loadDay();amsg="Возвращено по умолчанию";render()}
+  else if(a==="saveday"){const o={};for(let p=1;p<=5;p++)o[p]=edit[p].filter(x=>x[0]);OV[aiso]=o;amsg=await push()}
+  else if(a==="resetday"){delete OV[aiso];amsg=await push();loadDay()}
   else if(a==="badd")bedit[b.dataset.g].push(["","",""]);
   else if(a==="bdel")bedit[b.dataset.g].splice(+b.dataset.i,1);
   else if(a==="savebells"){
     for(const k in bedit)for(const r of bedit[k]){if(!r[0]&&!r[1])continue;r[1]=r[1].replace(/\s/g,"").replace(/[-—]/,"–");if(!/^\d{1,2}:\d{2}–\d{1,2}:\d{2}$/.test(r[1])){amsg="Неверное время в строке «"+r[0]+"»";break}}
-    if(!amsg){for(const k in bedit)G[k].rows=bedit[k].filter(r=>r[0]&&r[1]);amsg=store.set("bells",G)?"Звонки сохранены":"Не удалось сохранить";render()}}
-  else if(a==="resetbells"){["mon","vsp","thu"].forEach(k=>G[k].rows=cp0(G0[k].rows));store.del("bells");bedit={mon:cp0(G.mon.rows),vsp:cp0(G.vsp.rows),thu:cp0(G.thu.rows)};amsg="Стандартные звонки";render()}
+    if(!amsg){for(const k in bedit)G[k].rows=bedit[k].filter(r=>r[0]&&r[1]);amsg=await push()}}
+  else if(a==="resetbells"){["mon","vsp","thu"].forEach(k=>G[k].rows=cp0(G0[k].rows));amsg=await push();bedit=bellsCopy()}
+  else if(a==="savetags"){SH=cp0(she);amsg=await push()}
   else if(a==="import"){try{
     const j=JSON.parse(document.getElementById("ajson").value);
-    if(j.bells){for(const k of["mon","vsp","thu"])if(!j.bells[k]||!Array.isArray(j.bells[k].rows))throw 0;Object.assign(G,j.bells);store.set("bells",G)}
-    if(j.ov&&typeof j.ov==="object"){OV=j.ov;store.set("ov",OV)}
-    amsg="Загружено";render()}catch(x){amsg="Неверный формат данных"}}
-  else if(a==="newpin"){store.del("pin");isAdm=false}
+    for(const k of["mon","vsp","thu"])if(!j.bells||!j.bells[k]||!Array.isArray(j.bells[k].rows))throw 0;
+    for(const k of["mon","vsp","thu"])G[k].rows=cp0(j.bells[k].rows);
+    OV=j.ov&&typeof j.ov==="object"?j.ov:{};SH=j.sh&&typeof j.sh==="object"?j.sh:{};
+    amsg=await push()}catch(x){amsg="Неверный формат данных"}}
+  else if(a==="logout"){tok=null;tuser="";ls("iv_gh")}
   else if(a==="resetall"){
     if(!b.dataset.c){b.dataset.c=1;b.textContent="Нажмите ещё раз";return}
-    ["mon","vsp","thu"].forEach(k=>G[k].rows=cp0(G0[k].rows));OV={};store.del("bells");store.del("ov");amsg="Всё сброшено";render()}
+    ["mon","vsp","thu"].forEach(k=>G[k].rows=cp0(G0[k].rows));OV={};SH={};amsg=await push()}
   drawAdmin();
 });
 ac.addEventListener("change",e=>{if(e.target.id==="ad"){aiso=e.target.value;amsg="";loadDay();drawAdmin()}});
-document.getElementById("admbtn").onclick=()=>{amsg="";isAdm=false;drawAdmin();dlgA.showModal()};
+document.getElementById("admbtn").onclick=()=>{amsg="";if(tok){aiso=defaultIso();loadDay();she=cp0(SH)}drawAdmin();dlgA.showModal()};
+if(IN_APP)document.getElementById("admbtn").style.display="none";
 document.getElementById("xa").onclick=()=>dlgA.close();
 dlgA.addEventListener("click",e=>{if(e.target===dlgA)dlgA.close()});
-dlgA.addEventListener("close",()=>{isAdm=false});
 render();
 </script>
-</body>
-</html>
