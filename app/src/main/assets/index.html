@@ -7,9 +7,9 @@
 <title>Расписание ИВ 234</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d28d9'/%3E%3Ctext x='50' y='46' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='700' font-size='38' fill='white'%3EIV%3C/text%3E%3Ctext x='50' y='84' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='700' font-size='38' fill='white'%3E234%3C/text%3E%3C/svg%3E">
 <style>
-:root{--bg:#f6f7fb;--card:#fff;--text:#1d2433;--muted:#6b7385;--line:#e2e5ee;--accent:#6d28d9;--hl:#f1eafd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161c;--card:#1d2029;--text:#eceef4;--muted:#9aa1b3;--line:#313644;--accent:#8b5cf6;--hl:#2d2442}}
-:root[data-theme="dark"]{--bg:#14161c;--card:#1d2029;--text:#eceef4;--muted:#9aa1b3;--line:#313644;--accent:#8b5cf6;--hl:#2d2442}
+:root{--bg:#f6f7fb;--card:#fff;--text:#1d2433;--muted:#6b7385;--line:#e2e5ee;--accent:#6d28d9;--hl:#f1eafd;--glass:rgba(255,255,255,.58);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161c;--card:#1d2029;--text:#eceef4;--muted:#9aa1b3;--line:#313644;--accent:#8b5cf6;--hl:#2d2442;--glass:rgba(34,36,50,.55)}}
+:root[data-theme="dark"]{--bg:#14161c;--card:#1d2029;--text:#eceef4;--muted:#9aa1b3;--line:#313644;--accent:#8b5cf6;--hl:#2d2442;--glass:rgba(34,36,50,.55)}
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 12px 40px}
@@ -48,7 +48,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 .bt{min-width:0;table-layout:auto;margin-bottom:14px}
 .bt th{text-align:left}
 .bt tr.long td{background:#f5e663;color:#222}
-.bt tr.cur td{outline:2px solid var(--accent);outline-offset:-2px;font-weight:700}
+.bt tr.cur td{background:var(--accent);color:#fff;font-weight:700}
 .bh{margin:6px 0;font-weight:700;color:var(--accent)}
 #cards{display:none}
 .dc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
@@ -78,8 +78,6 @@ td.hol{text-align:center;vertical-align:middle;background:var(--hl)}
 .seeb{margin-top:6px;background:var(--accent);color:#fff;border-color:var(--accent);font-size:13px;padding:8px 12px}
 .seeb:hover{opacity:.9}
 .dc .hb{padding:6px 0}
-td.now,.cp.now{box-shadow:inset 0 0 0 2px var(--accent);background:var(--hl)}
-td.next,.cp.next{box-shadow:inset 0 0 0 1px var(--accent)}
 td.now::before,td.next::before,.cp.now::before,.cp.next::before{content:attr(data-b);display:block;font-size:11px;font-weight:700;color:var(--accent);margin-bottom:4px}
 #ac input,#ac textarea{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;min-width:0}
 #ac input[type=checkbox]{width:auto}
@@ -92,13 +90,37 @@ td.now::before,td.next::before,.cp.now::before,.cp.next::before{content:attr(dat
 .am{margin-top:6px;color:var(--accent);font-weight:600}
 .shoe{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;background:var(--hl);color:var(--accent);font-size:12px;font-weight:600}
 .tg{display:flex;gap:8px;align-items:center;margin:8px 0}
+/* текущая пара: на ПК — рамка с отступом от текста, на телефоне (карточки) — заливка */
+td.now{outline:2px solid var(--accent);outline-offset:-6px;border-radius:12px}
+td.next{outline:1px dashed var(--accent);outline-offset:-6px;border-radius:12px}
+.cp.now{background:var(--accent);color:#fff;border-radius:12px;padding:8px 10px;margin:2px -4px;border-top-color:transparent}
+.cp.now .ct,.cp.now .ct b,.cp.now .t,.cp.now .r,.cp.now::before{color:#fff}
+.cp.now .shoe{background:rgba(255,255,255,.22);color:#fff}
+.cp.next{outline:1px dashed var(--accent);outline-offset:-3px;border-radius:10px}
+/* Liquid Glass */
+body{background:radial-gradient(900px 500px at 8% -8%,rgba(109,40,217,.2),transparent),radial-gradient(800px 520px at 100% 0,rgba(236,72,153,.12),transparent),var(--bg);background-attachment:fixed}
+dialog{background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 24px 60px rgba(40,20,90,.3)}
+dialog::backdrop{background:rgba(35,20,70,.3);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+.top button,.nav button,.fab,.scroll,.dc{background:var(--glass);-webkit-backdrop-filter:blur(14px) saturate(1.6);backdrop-filter:blur(14px) saturate(1.6);border-color:rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 16px rgba(40,20,90,.1)}
+.nav button:disabled{opacity:.45}
+.fab{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:50px;height:50px;border-radius:50%;font-size:22px;padding:0;z-index:5}
+#ac select{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;max-width:100%;flex:1 1 180px;min-width:0}
+.ap.lat{border-color:var(--accent)}
+.ap ul{margin:6px 0 0;padding-left:18px;font-size:13px}
+.top{flex-wrap:wrap}
+.topr{display:flex;gap:8px;margin-left:auto}
+@media (max-width:760px){.top button{padding:8px 10px;font-size:14px}}
+body{padding-bottom:84px!important}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
     <button id="bells">🔔 Звонки</button>
-    <button id="admbtn">⚙ Админ</button>
+    <div class="topr">
+      <button id="mybtn">✏ Мои правки</button>
+      <button id="admbtn" style="display:none">⚙ Админ</button>
+    </div>
   </div>
   <div class="hero">
     <div class="num" id="num">–</div>
@@ -114,7 +136,9 @@ td.now::before,td.next::before,.cp.now::before,.cp.next::before{content:attr(dat
     <button id="next">След. неделя →</button>
   </div>
   <dialog id="dlg"><div class="dh"><b>🔔 Расписание звонков</b><button id="x">✕</button></div><div class="tabs" id="tabs"></div><div id="bc"></div></dialog>
-  <dialog id="dlgA"><div class="dh"><b>⚙ Админ-панель</b><button id="xa">✕</button></div><div id="ac"></div></dialog>
+  <button id="newsbtn" class="fab" aria-label="Что нового">📣</button>
+  <dialog id="dlgN"><div class="dh"><b>📣 Что нового</b><button id="xn">✕</button></div><div id="nc"></div></dialog>
+  <dialog id="dlgA"><div class="dh"><b id="ath">⚙ Админ-панель</b><button id="xa">✕</button></div><div id="ac"></div></dialog>
   <dialog id="dlg2"><div class="dh"><b id="h2t"></b><button id="x2">✕</button></div><div id="h2c"></div></dialog>
 </div>
 <script>
@@ -191,17 +215,17 @@ function render(){
   let h="<thead><tr><th class='n'>№</th>";
   DAYS.forEach((d,i)=>{
     const dt=new Date(start+i*DAY);
-    h+=`<th class="${isCur&&i===todayIdx?"today":""}">${d}${OV[iso(start+i*DAY)]?" ✎":""}<br><span style="font-weight:400;font-size:12px">${dt.toLocaleDateString("ru-RU",{day:"numeric",month:"short",timeZone:"UTC"})}</span></th>`;
+    h+=`<th class="${isCur&&i===todayIdx?"today":""}">${d}${(OV[iso(start+i*DAY)]||MY[iso(start+i*DAY)])?" ✎":""}<br><span style="font-weight:400;font-size:12px">${dt.toLocaleDateString("ru-RU",{day:"numeric",month:"short",timeZone:"UTC"})}</span></th>`;
   });
   h+="</tr></thead><tbody>";
   for(let p=1;p<=5;p++){
     h+=`<tr><td class="n">${p}</td>`;
     for(let d=0;d<5;d++){
       const dayT=start+d*DAY, off=dayT<START||dayT>END;
-      const hol=HOL[iso(dayT)];
+      const hn=HOL[iso(dayT)],cx=!hn&&isCancel(dayT),hol=hn||(cx?"отмена пар":"");
       if(hol){
-        if(p===1){const n=hasLessons(d,mon1+(week-1)*7*DAY+d*DAY);
-          h+=`<td rowspan="5" class="hol${isCur&&d===todayIdx?" today":""}">${holBox(hol,d,n)}</td>`;}
+        if(p===1){const n=hasPlanned(d,mon1+(week-1)*7*DAY+d*DAY);
+          h+=`<td rowspan="5" class="hol${isCur&&d===todayIdx?" today":""}">${holBox(hol,d,n,cx)}</td>`;}
         continue;
       }
       const ls=off?[]:lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
@@ -214,16 +238,16 @@ function render(){
   let cs="";
   for(let d=0;d<5;d++){
     const dayT=start+d*DAY, off=dayT<START||dayT>END;
-    const hol=HOL[iso(dayT)];
+    const hn=HOL[iso(dayT)],cx=!hn&&isCancel(dayT),hol=hn||(cx?"отмена пар":"");
     let body="";
-    if(hol)body=holBox(hol,d,hasLessons(d,mon1+(week-1)*7*DAY+d*DAY));
+    if(hol)body=holBox(hol,d,hasPlanned(d,mon1+(week-1)*7*DAY+d*DAY),cx);
     for(let p=1;p<=5;p++){
       const ls=off?[]:lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
       if(!ls.length||hol)continue;
       const br=G[gk(d)].rows.find(r=>r[0]===String(p));
       body+=`<div class="cp${cls(cp,d,p)}"${bat(cp,d,p)}><div class="ct"><b>${p} пара</b><span>${br?esc(br[1]):""}</span></div>`+ls.map(l=>`${lesHtml(l)}`).join("")+"</div>";
     }
-    cs+=`<div class="dc${isCur&&d===todayIdx?" today":""}${off?" off":""}"><div class="dh2"><b>${DAYS[d]}${OV[iso(dayT)]?" ✎":""}</b><span>${fmt(dayT)}</span></div>${body||'<div class="empty">Занятий нет</div>'}</div>`;
+    cs+=`<div class="dc${isCur&&d===todayIdx?" today":""}${off?" off":""}"><div class="dh2"><b>${DAYS[d]}${(OV[iso(dayT)]||MY[iso(dayT)])?" ✎":""}</b><span>${fmt(dayT)}</span></div>${body||'<div class="empty">Занятий нет</div>'}</div>`;
   }
   document.getElementById("cards").innerHTML=cs;
 }
@@ -270,16 +294,17 @@ document.getElementById("tabs").onclick=e=>{const i=e.target.dataset.i;if(i===un
 // ===== Праздники (производственный календарь РФ 2026, сентябрь–декабрь) =====
 const iso=t=>new Date(t).toISOString().slice(0,10);
 const HOL={"2026-11-04":"День народного единства","2026-12-31":"Выходной день (перенос с 4 января)"};
-function holBox(name,d,has){
-  return `<div class="hb"><div class="hi">🎉</div><b>Занятий нет — праздник</b><div class="t">${name}</div>${has?`<button class="seeb" data-d="${d}">Увидеть расписание на этот день</button>`:""}</div>`;
+function holBox(name,d,has,cancel){
+  return `<div class="hb"><div class="hi">${cancel?"🚫":"🎉"}</div><b>${cancel?"Занятий нет — выходной":"Занятий нет — праздник"}</b><div class="t">${esc(name)}</div>${has?`<button class="seeb" data-d="${d}">Увидеть расписание на этот день</button>`:""}</div>`;
 }
 const dlg2=document.getElementById("dlg2");
 function openHol(d){
   const dayT=mon1+(week-1)*7*DAY+d*DAY;
   document.getElementById("h2t").textContent=DAYS[d]+", "+fmt(dayT);
-  let c=`<div class="t" style="margin-bottom:10px">В этот день занятий нет из-за праздника. Пары, которые должны были быть:</div>`;
+  const cx=!HOL[iso(dayT)]&&isCancel(dayT);
+  let c=`<div class="t" style="margin-bottom:10px">В этот день занятий нет из-за ${cx?"отмены пар":"праздника"}. Пары, которые должны были быть:</div>`;
   for(let p=1;p<=5;p++){
-    const ls=lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
+    const ls=baseLessons(p,d,mon1+(week-1)*7*DAY+d*DAY);
     if(!ls.length)continue;
     const br=G[gk(d)].rows.find(r=>r[0]===String(p));
     c+=`<div class="cp"><div class="ct"><b>${p} пара</b><span>${br?esc(br[1]):""}</span></div>`+ls.map(l=>`${lesHtml(l)}`).join("")+"</div>";
@@ -309,6 +334,7 @@ function applyState(s){
   OV=s.ov&&typeof s.ov==="object"?s.ov:{};SH=s.sh&&typeof s.sh==="object"?s.sh:{};rev=+s.rev||0;return true;
 }
 applyState(lg("iv_state"));
+let MY=lg("iv_my")||{}; // личные правки пользователя (только на этом устройстве)
 {const t=lg("iv_gh");if(t&&t.token){tok=t.token;tuser=t.user}}
 async function pull(){
   if(IN_APP)return;
@@ -322,8 +348,12 @@ async function pull(){
 window.__setState=t=>{try{applyState(JSON.parse(t));render()}catch(e){}};
 const lesHtml=l=>`<div class="les"><b>${esc(l[2])}</b>${l[3]?`<span class="r">каб. ${esc(l[3])}</span>`:""}<div class="t">${esc(l[5])}</div>${SH[l[2]+"|"+l[5]]?'<span class="shoe">👟 нужна сменка</span>':""}</div>`;
 const weekOf=t=>Math.floor((t-mon1)/DAY/7)+1;
-function lessonsFor(p,d,t){const o=OV[iso(t)];if(o)return(o[p]||[]).map(x=>[p,d,x[0],x[1],"",x[2]]);return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
+function lessonsFor(p,d,t,noMy){const o=(!noMy&&MY[iso(t)])||OV[iso(t)];if(o)return(o[p]||[]).map(x=>[p,d,x[0],x[1],"",x[2]]);return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
 function hasLessons(d,t){return[1,2,3,4,5].some(p=>lessonsFor(p,d,t).length)}
+function baseLessons(p,d,t){return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
+function hasPlanned(d,t){return[1,2,3,4,5].some(p=>baseLessons(p,d,t).length)}
+// день отменён админом: правка есть, но все пары убраны (личные правки пользователя в приоритете)
+function isCancel(t){const k=iso(t),o=OV[k];return!MY[k]&&!!o&&[1,2,3,4,5].every(p=>!(o[p]&&o[p].length))}
 function curPair(){
   if(!(inRange&&week===realWeek)||todayIdx>4||HOL[iso(utc(now))])return null;
   const m=now.getHours()*60+now.getMinutes(),t=utc(now);let nx=null;
@@ -369,16 +399,19 @@ async function push(){
   }catch(e){return"Нет связи с GitHub"}
 }
 const dlgA=document.getElementById("dlgA"),ac=document.getElementById("ac");
-let atab="day",aiso="",edit={},bedit={},she={},amsg="";
+let atab="day",aiso="",edit={},bedit={},she={},amsg="",umode=false,cat=[];
 const dIdx=t=>(new Date(t).getUTCDay()+6)%7;
 function defaultIso(){const t=utc(now)+(dow>=5?(7-dow)*DAY:0);return iso(Math.min(Math.max(t,START),END))}
-function loadDay(){const t=Date.parse(aiso+"T00:00:00Z");edit={};if(isNaN(t)||dIdx(t)>4)return;for(let p=1;p<=5;p++)edit[p]=lessonsFor(p,dIdx(t),t).map(l=>[l[2],l[3],l[5]])}
+function loadDay(){const t=Date.parse(aiso+"T00:00:00Z");edit={};if(isNaN(t)||dIdx(t)>4)return;for(let p=1;p<=5;p++)edit[p]=lessonsFor(p,dIdx(t),t,!umode).map(l=>[l[2],l[3],l[5]])}
 function dayHtml(){
   const t=Date.parse(aiso+"T00:00:00Z");
   let h=`<div class="ar"><input type="date" id="ad" value="${esc(aiso)}" min="2026-09-01" max="2026-12-31"></div>`;
   if(isNaN(t)||dIdx(t)>4)return h+`<div class="t">Выберите будний день.</div>`;
-  h+=`<div class="t">${DAYS[dIdx(t)]}${OV[aiso]?" · изменено вручную":""}${HOL[aiso]?" · праздник: "+HOL[aiso]:""}</div>`;
-  for(let p=1;p<=5;p++)h+=`<div class="ap"><b>${p} пара</b>`+(edit[p]||[]).map((x,i)=>`<div class="lr" data-p="${p}"><input placeholder="Предмет" maxlength="100" value="${esc(x[0])}"><input class="s" placeholder="Каб." maxlength="30" value="${esc(x[1])}"><input placeholder="Преподаватель" maxlength="100" value="${esc(x[2])}"><button data-a="del" data-p="${p}" data-i="${i}">✕</button></div>`).join("")+`<button data-a="add" data-p="${p}">+ добавить</button></div>`;
+  h+=`<div class="t">${DAYS[dIdx(t)]}${(umode?MY[aiso]:OV[aiso])?" · изменено вручную":""}${HOL[aiso]?" · праздник: "+HOL[aiso]:""}</div>`;
+  if(!umode)h+=`<div class="t">Чтобы отменить день, уберите все пары и сохраните: он будет показан как выходной с причиной «отмена пар».</div>`;
+  cat=catalog();
+  const opts=`<option value="">＋ выбрать из списка…</option>`+cat.map((c,k)=>`<option value="${k}">${esc(c[0])} · ${esc(c[2])}${c[1]?" · каб. "+esc(c[1]):""}${SH[c[0]+"|"+c[2]]?" 👟":""}</option>`).join("");
+  for(let p=1;p<=5;p++)h+=`<div class="ap"><b>${p} пара</b>`+(edit[p]||[]).map((x,i)=>`<div class="lr" data-p="${p}"><input placeholder="Предмет" maxlength="100" value="${esc(x[0])}"><input class="s" placeholder="Каб." maxlength="30" value="${esc(x[1])}"><input placeholder="Преподаватель" maxlength="100" value="${esc(x[2])}">${SH[x[0]+"|"+x[2]]?'<span class="shoe">👟 нужна сменка</span>':""}<button data-a="del" data-p="${p}" data-i="${i}">✕</button></div>`).join("")+`<div class="ar"><select class="qs" data-p="${p}">${opts}</select><button data-a="add" data-p="${p}">+ вручную</button></div></div>`;
   return h+`<div class="ar"><button class="seeb" data-a="saveday">Сохранить день</button><button data-a="resetday">Вернуть по умолчанию</button></div>`;
 }
 function bellsHtml(){
@@ -393,7 +426,16 @@ function tagsHtml(){
 function dataHtml(){
   return`<div class="t">Здесь можно скопировать всё расписание текстом (резервная копия) или вставить новое и нажать «Загрузить».</div><textarea id="ajson" rows="8">${esc(JSON.stringify({bells:{mon:G.mon,vsp:G.vsp,thu:G.thu},ov:OV,sh:SH}))}</textarea><div class="ar"><button class="seeb" data-a="import">Загрузить</button><button data-a="resetall">Сбросить всё</button><button data-a="logout">Выйти</button></div>`;
 }
+function catalog(){
+  const m=new Map();
+  L.forEach(l=>m.set(l[2]+"|"+l[3]+"|"+l[5],[l[2],l[3],l[5]]));
+  [OV,MY].forEach(o=>Object.values(o).forEach(d=>{for(const p in d)d[p].forEach(x=>m.set(x[0]+"|"+x[1]+"|"+x[2],[x[0],x[1],x[2]]))}));
+  return[...m.values()].filter(x=>x[0]).sort((a,b)=>a[0].localeCompare(b[0],"ru")||String(a[1]).localeCompare(String(b[1])));
+}
+function syncTop(){document.getElementById("admbtn").style.display=(!IN_APP&&tok)?"":"none"}
 function drawAdmin(){
+  syncTop();
+  if(umode){ac.innerHTML=`<div class="t">Правки видны только вам: они хранятся на этом устройстве и накладываются поверх общего расписания.</div>${dayHtml()}<div class="am">${esc(amsg)}</div>`;return}
   if(!tok){ac.innerHTML=`<div class="t">Вход для администраторов (${ADMINS.join(", ")}). Вставьте токен доступа GitHub — он запоминается на этом устройстве.</div><div class="t"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Создать токен</a>: доступ только к репозиторию «${esc(GH_REPO.split("/")[1])}», право Contents → Read and write.</div><div class="ar"><input id="lp" type="password" placeholder="Токен GitHub" autocomplete="off"><button data-a="login">Войти</button></div><div class="am">${esc(amsg)}</div>`;return}
   const tabs=[["day","Пары на день"],["tags","Метки"],["bells","Звонки"],["data","Данные"]].map(([k,n])=>`<button data-a="tab" data-k="${k}" class="${atab===k?"on":""}">${n}</button>`).join("");
   ac.innerHTML=`<div class="t">Вы вошли как <b>${esc(tuser)}</b></div><div class="tabs">${tabs}</div>${atab==="day"?dayHtml():atab==="bells"?bellsHtml():atab==="tags"?tagsHtml():dataHtml()}<div class="am">${esc(amsg)}</div>`;
@@ -425,12 +467,12 @@ ac.addEventListener("click",async e=>{
     }catch(x){amsg="Нет связи с GitHub"}
     drawAdmin();return;
   }
-  if(tok&&a!=="resetall"&&a!=="import"&&a!=="logout")collect();
+  if((tok||umode)&&a!=="resetall"&&a!=="import"&&a!=="logout")collect();
   if(a==="tab"){atab=b.dataset.k;if(atab==="day")loadDay();if(atab==="bells")bedit=bellsCopy();if(atab==="tags")she=cp0(SH)}
   else if(a==="add")edit[b.dataset.p].push(["","",""]);
   else if(a==="del")edit[b.dataset.p].splice(+b.dataset.i,1);
-  else if(a==="saveday"){const o={};for(let p=1;p<=5;p++)o[p]=edit[p].filter(x=>x[0]);OV[aiso]=o;amsg=await push()}
-  else if(a==="resetday"){delete OV[aiso];amsg=await push();loadDay()}
+  else if(a==="saveday"){const o={};for(let p=1;p<=5;p++)o[p]=edit[p].filter(x=>x[0]);if(umode){MY[aiso]=o;ls("iv_my",MY);amsg="Сохранено на этом устройстве";render()}else{OV[aiso]=o;amsg=await push()}}
+  else if(a==="resetday"){if(umode){delete MY[aiso];ls("iv_my",MY);amsg="Возвращено по умолчанию";render()}else{delete OV[aiso];amsg=await push()}loadDay()}
   else if(a==="badd")bedit[b.dataset.g].push(["","",""]);
   else if(a==="bdel")bedit[b.dataset.g].splice(+b.dataset.i,1);
   else if(a==="savebells"){
@@ -450,10 +492,40 @@ ac.addEventListener("click",async e=>{
     ["mon","vsp","thu"].forEach(k=>G[k].rows=cp0(G0[k].rows));OV={};SH={};amsg=await push()}
   drawAdmin();
 });
-ac.addEventListener("change",e=>{if(e.target.id==="ad"){aiso=e.target.value;amsg="";loadDay();drawAdmin()}});
-document.getElementById("admbtn").onclick=()=>{amsg="";if(tok){aiso=defaultIso();loadDay();she=cp0(SH)}drawAdmin();dlgA.showModal()};
-if(IN_APP)document.getElementById("admbtn").style.display="none";
+ac.addEventListener("change",e=>{
+  if(e.target.id==="ad"){aiso=e.target.value;amsg="";loadDay();drawAdmin()}
+  else if(e.target.classList.contains("qs")&&e.target.value!==""){collect();edit[e.target.dataset.p].push(cat[+e.target.value].slice());drawAdmin()}
+});
+const openAdmin=()=>{umode=false;document.getElementById("ath").textContent="⚙ Админ-панель";amsg="";if(tok){aiso=defaultIso();loadDay();she=cp0(SH)}drawAdmin();dlgA.showModal()};
+document.getElementById("admbtn").onclick=openAdmin;
 document.getElementById("xa").onclick=()=>dlgA.close();
 dlgA.addEventListener("click",e=>{if(e.target===dlgA)dlgA.close()});
+const openMy=()=>{umode=true;document.getElementById("ath").textContent="✏ Мои правки";amsg="";aiso=defaultIso();loadDay();drawAdmin();dlgA.showModal()};
+{ // долгое нажатие на «Мои правки» (или адрес с #admin) открывает вход для админов
+  const b=document.getElementById("mybtn");let t=null,fired=false;
+  b.addEventListener("pointerdown",()=>{fired=false;t=setTimeout(()=>{fired=true;if(!IN_APP)openAdmin()},800)});
+  ["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,()=>clearTimeout(t)));
+  b.addEventListener("contextmenu",e=>e.preventDefault());
+  b.onclick=()=>{if(fired){fired=false;return}openMy()};
+}
+function alignFab(){ // рупор — внизу экрана, строго под кнопкой «Звонки»
+  const r=document.getElementById("bells").getBoundingClientRect(),f=document.getElementById("newsbtn");
+  f.style.left=Math.max(6,r.left+r.width/2-f.offsetWidth/2)+"px";
+}
+alignFab();addEventListener("resize",alignFab);addEventListener("load",alignFab);
+syncTop();
+if(location.hash==="#admin"&&!IN_APP)openAdmin();
+const CHANGES=[
+ {d:"26.10.2026",t:"Быстрые правки и новый вид",i:["Быстрая правка пар: выбор предмета из списка — преподаватель, кабинет и метка «нужна сменка» подставляются сами","«Мои правки» — личные изменения расписания, видны только на вашем устройстве","Стиль Liquid Glass для окон и кнопок","Текущая пара: заливка в звонках и на телефоне, рамка на компьютере","Кнопка «Что нового»","Отмена пар: если админ убирает все пары на день, он показывается как выходной с причиной «отмена пар»"]},
+ {d:"",t:"Общее расписание и админ-панель",i:["Правки админов видят все: сайт и приложение","Метка «нужна сменка» для предмета и преподавателя","Защита от XSS"]},
+ {d:"",t:"Приложение и оффлайн",i:["Последняя сохранённая копия расписания работает без интернета","Усиленная безопасность приложения","Окно обновления один раз для каждой версии"]},
+ {d:"",t:"Расписание, звонки, праздники",i:["Расчёт учебной недели с 1 сентября","Расписание звонков и подсветка текущей пары","Праздники по производственному календарю 2026","Версия для телефонов"]}
+];
+document.getElementById("newsbtn").onclick=()=>{
+  document.getElementById("nc").innerHTML=CHANGES.map((c,k)=>(k===1?'<div class="bh">Ранее</div>':"")+`<div class="ap${k?"":" lat"}"><b>${k?"":"Последнее обновление · "}${esc(c.t)}</b>${c.d?` <span class="t">${esc(c.d)}</span>`:""}<ul>${c.i.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
+  document.getElementById("dlgN").showModal();
+};
+document.getElementById("xn").onclick=()=>document.getElementById("dlgN").close();
+document.getElementById("dlgN").addEventListener("click",e=>{if(e.target.id==="dlgN")e.target.close()});
 render();
 </script>
