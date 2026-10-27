@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://api.github.com; form-action 'none'; base-uri 'none'">
 <title>Расписание ИВ 234</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%236d28d9'/%3E%3Ctext x='50' y='46' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='700' font-size='38' fill='white'%3EIV%3C/text%3E%3Ctext x='50' y='84' text-anchor='middle' font-family='system-ui,Arial,sans-serif' font-weight='700' font-size='38' fill='white'%3E234%3C/text%3E%3C/svg%3E">
 <style>
@@ -110,17 +110,26 @@ dialog::backdrop{background:rgba(35,20,70,.3);-webkit-backdrop-filter:blur(5px);
 .top{flex-wrap:wrap}
 .topr{display:flex;gap:8px;margin-left:auto}
 @media (max-width:760px){.top button{padding:8px 10px;font-size:14px}}
-body{padding-bottom:84px!important}
+.mwrap{position:relative}
+#hamb{font-size:20px;line-height:1;padding:8px 14px}
+#menu{position:absolute;top:calc(100% + 8px);left:0;min-width:220px;display:flex;flex-direction:column;gap:2px;padding:8px;border-radius:18px;background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 18px 40px rgba(40,20,90,.28);z-index:20}
+#menu[hidden]{display:none}
+#menu button{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border:0;box-shadow:none;text-align:left;width:100%;padding:11px 12px;border-radius:12px}
+#menu button:hover{background:var(--hl)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <button id="bells">🔔 Звонки</button>
-    <div class="topr">
-      <button id="mybtn">✏ Мои правки</button>
-      <button id="admbtn" style="display:none">⚙ Админ</button>
+    <div class="mwrap">
+      <button id="hamb" aria-label="Меню" aria-expanded="false">☰</button>
+      <div id="menu" hidden>
+        <button id="bells">🔔 Звонки</button>
+        <button id="mybtn">✏ Мои правки</button>
+        <button id="newsbtn">📣 Что нового</button>
+      </div>
     </div>
+    <button id="admbtn">⚙ Админ</button>
   </div>
   <div class="hero">
     <div class="num" id="num">–</div>
@@ -136,7 +145,6 @@ body{padding-bottom:84px!important}
     <button id="next">След. неделя →</button>
   </div>
   <dialog id="dlg"><div class="dh"><b>🔔 Расписание звонков</b><button id="x">✕</button></div><div class="tabs" id="tabs"></div><div id="bc"></div></dialog>
-  <button id="newsbtn" class="fab" aria-label="Что нового">📣</button>
   <dialog id="dlgN"><div class="dh"><b>📣 Что нового</b><button id="xn">✕</button></div><div id="nc"></div></dialog>
   <dialog id="dlgA"><div class="dh"><b id="ath">⚙ Админ-панель</b><button id="xa">✕</button></div><div id="ac"></div></dialog>
   <dialog id="dlg2"><div class="dh"><b id="h2t"></b><button id="x2">✕</button></div><div id="h2c"></div></dialog>
@@ -164,7 +172,7 @@ const L=[
 [1,2,"МДК.05.02.","106л","13","Лукьянова С.П."],
 [2,2,"ОПСО","321","1-17","Павлихина Е.В."],
 [3,2,"Основы фил.","234","1-17","Волошина Т.К."],
-[4,2,"Эконом. отр.","318","1-17","Ковзаренко Л.Н."],
+[4,2,"Эконом. отр.","318","1-17","Кобзаренко Л.Н."],
 [5,2,"МДК.05.03.","315л","1-17","Николаенко К.С."],
 
 [1,3,"МДК.05.02.","106л","11,12,13,16","Лукьянова С.П."],
@@ -179,7 +187,7 @@ const L=[
 [1,4,"Основы фил.","234","5,10,13-17","Волошина Т.К."],
 [2,4,"МДК.05.02.","106л","1-17","Лукьянова С.П."],
 [3,4,"ПОПД","412","1-17","Минина М.Х."],
-[4,4,"Эконом. отр.","318","1,3,4,6-8,10,12-17","Ковзаренко Л.Н."],
+[4,4,"Эконом. отр.","318","1,3,4,6-8,10,12-17","Кобзаренко Л.Н."],
 [4,4,"Физ.культура","","2,9,11","Волков В.В."],
 [5,4,"МДК.05.03.","315л","1-3,9,10,17","Николаенко К.С."],
 [5,4,"МДК.05.01.","106л","11,12","Лукьянова С.П."]
@@ -434,7 +442,9 @@ function catalog(){
   [OV,MY].forEach(o=>Object.values(o).forEach(d=>{for(const p in d)d[p].forEach(x=>m.set(x[0]+"|"+x[1]+"|"+x[2],[x[0],x[1],x[2]]))}));
   return[...m.values()].filter(x=>x[0]).sort((a,b)=>a[0].localeCompare(b[0],"ru")||String(a[1]).localeCompare(String(b[1])));
 }
-function syncTop(){document.getElementById("admbtn").style.display=(!IN_APP&&tok)?"":"none"}
+let adminOk=!IN_APP; // в приложении кнопка включается, только если приложение разрешило админ-панель
+window.__enableAdmin=()=>{adminOk=true;syncTop()};
+function syncTop(){document.getElementById("admbtn").style.display=adminOk?"":"none"}
 function drawAdmin(){
   syncTop();
   if(umode){ac.innerHTML=`<div class="t">Правки видны только вам: они хранятся на этом устройстве и накладываются поверх общего расписания.</div>${dayHtml()}<div class="am">${esc(amsg)}</div>`;return}
@@ -503,22 +513,20 @@ document.getElementById("admbtn").onclick=openAdmin;
 document.getElementById("xa").onclick=()=>dlgA.close();
 dlgA.addEventListener("click",e=>{if(e.target===dlgA)dlgA.close()});
 const openMy=()=>{umode=true;document.getElementById("ath").textContent="✏ Мои правки";amsg="";aiso=defaultIso();loadDay();drawAdmin();dlgA.showModal()};
-{ // долгое нажатие на «Мои правки» (или адрес с #admin) открывает вход для админов
-  const b=document.getElementById("mybtn");let t=null,fired=false;
-  b.addEventListener("pointerdown",()=>{fired=false;t=setTimeout(()=>{fired=true;if(!IN_APP)openAdmin()},800)});
-  ["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,()=>clearTimeout(t)));
-  b.addEventListener("contextmenu",e=>e.preventDefault());
-  b.onclick=()=>{if(fired){fired=false;return}openMy()};
+document.getElementById("mybtn").onclick=openMy;
+{ // меню-гамбургер
+  const m=document.getElementById("menu"),h=document.getElementById("hamb");
+  const close=()=>{m.hidden=true;h.setAttribute("aria-expanded","false")};
+  h.onclick=e=>{e.stopPropagation();m.hidden=!m.hidden;h.setAttribute("aria-expanded",String(!m.hidden))};
+  m.addEventListener("click",e=>{if(e.target.closest("button"))close()});
+  document.addEventListener("click",e=>{if(!m.hidden&&!e.target.closest(".mwrap"))close()});
+  addEventListener("keydown",e=>{if(e.key==="Escape")close()});
 }
-function alignFab(){ // рупор — внизу экрана, строго под кнопкой «Звонки»
-  const r=document.getElementById("bells").getBoundingClientRect(),f=document.getElementById("newsbtn");
-  f.style.left=Math.max(6,r.left+r.width/2-f.offsetWidth/2)+"px";
-}
-alignFab();addEventListener("resize",alignFab);addEventListener("load",alignFab);
 syncTop();
-if(location.hash==="#admin"&&!IN_APP)openAdmin();
+if(location.hash==="#admin"&&adminOk)openAdmin();
 const CHANGES=[
- {d:"26.10.2026",t:"Быстрые правки и новый вид",i:["Быстрая правка пар: выбор предмета из списка — преподаватель, кабинет и метка «нужна сменка» подставляются сами","«Мои правки» — личные изменения расписания, видны только на вашем устройстве","Стиль Liquid Glass для окон и кнопок","Текущая пара: заливка в звонках и на телефоне, рамка на компьютере","Кнопка «Что нового»","Отмена пар: если админ убирает все пары на день, он показывается как выходной с причиной «отмена пар»"]},
+ {d:"27.10.2026",t:"Меню и админ-панель",i:["Слева меню-гамбургер: звонки, «Мои правки» и «Что нового»","Админ-панель вынесена отдельной кнопкой справа и доступна на телефоне, в том числе в приложении","Исправлены «откаты» правок: принимаются только более новые данные, старые копии из кэша GitHub игнорируются","Данные расписания запрашиваются без кэша, правки доходят быстрее"]},
+ {d:"",t:"Быстрые правки и новый вид",i:["Быстрая правка пар: выбор предмета из списка — преподаватель, кабинет и метка «нужна сменка» подставляются сами","«Мои правки» — личные изменения расписания, видны только на вашем устройстве","Стиль Liquid Glass для окон и кнопок","Текущая пара: заливка в звонках и на телефоне, рамка на компьютере","Кнопка «Что нового»","Отмена пар: если админ убирает все пары на день, он показывается как выходной с причиной «отмена пар»"]},
  {d:"",t:"Общее расписание и админ-панель",i:["Правки админов видят все: сайт и приложение","Метка «нужна сменка» для предмета и преподавателя","Защита от XSS"]},
  {d:"",t:"Приложение и оффлайн",i:["Последняя сохранённая копия расписания работает без интернета","Усиленная безопасность приложения","Окно обновления один раз для каждой версии"]},
  {d:"",t:"Расписание, звонки, праздники",i:["Расчёт учебной недели с 1 сентября","Расписание звонков и подсветка текущей пары","Праздники по производственному календарю 2026","Версия для телефонов"]}

@@ -28,7 +28,7 @@ import java.util.Calendar;
 /**
  * Модель безопасности:
  *  - внутри WebView работает только страница, зашитая в APK (file:///android_asset);
- *  - WebView не имеет доступа к сети и блокирует любые другие адреса;
+ *  - WebView блокирует любые адреса, кроме api.github.com (и только для админ-панели; отключается ADMIN_IN_APP);
  *  - из интернета приложение скачивает только файл schedule.json с расписанием, сама Java-часть
  *    проверяет его и пересобирает; ни HTML, ни скриптов, ни файлов с сайта не загружается;
  *  - последняя удачно проверенная копия хранится на устройстве и работает без интернета.
@@ -39,6 +39,9 @@ public class MainActivity extends Activity {
     private static final String DATA_URL =
             "https://raw.githubusercontent.com/s8lfov/Schedule_android/main/schedule.json";
     private static final String ASSET_URL = "file:///android_asset/index.html";
+    // true — админ-панель работает и в приложении (WebView получает доступ только к api.github.com).
+    // false — приложение полностью отрезано от сети (админ правит расписание на сайте).
+    private static final boolean ADMIN_IN_APP = true;
     private static final int MAX_BYTES = 200 * 1024;
     private static final long POLL_MS = 2 * 60 * 1000;
 
@@ -73,7 +76,7 @@ public class MainActivity extends Activity {
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
-        s.setBlockNetworkLoads(true);          // WebView физически не может ходить в сеть
+        s.setBlockNetworkLoads(!ADMIN_IN_APP); // без админ-панели WebView физически не может ходить в сеть
         s.setAllowFileAccess(false);           // доступ к файлам телефона закрыт (assets работают)
         s.setAllowContentAccess(false);
         s.setAllowFileAccessFromFileURLs(false);
@@ -92,6 +95,8 @@ public class MainActivity extends Activity {
             public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
                 String u = r.getUrl().toString();
                 if (u.startsWith("file:///android_asset/") || u.startsWith("data:")) return null;
+                if (ADMIN_IN_APP && "https".equals(r.getUrl().getScheme())
+                        && "api.github.com".equals(r.getUrl().getHost())) return null; // только для админ-панели
                 return new WebResourceResponse("text/plain", "utf-8",
                         new ByteArrayInputStream(new byte[0]));
             }
@@ -100,6 +105,7 @@ public class MainActivity extends Activity {
             public void onPageFinished(WebView v, String url) {
                 String cached = getSharedPreferences("s", MODE_PRIVATE).getString("state", null);
                 if (cached != null) pushState(cached); // последняя сохранённая копия (работает без интернета)
+                if (ADMIN_IN_APP) web.evaluateJavascript("window.__enableAdmin&&window.__enableAdmin()", null);
             }
         });
 
