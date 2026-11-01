@@ -1,3 +1,45 @@
 plugins {
-    id 'com.android.application' version '8.5.2' apply false
+    id 'com.android.application'
+}
+android {
+    namespace 'com.iv234.schedule'
+    compileSdk 34
+    signingConfigs {
+        // запасной ключ из репозитория (используется, если секреты GitHub не заданы)
+        debug {
+            storeFile file("debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
+        // личный ключ из секретов GitHub (его нет в репозитории)
+        mine {
+            def f = System.getenv("KS_FILE")
+            if (f) {
+                storeFile file(f)
+                storePassword System.getenv("KS_PASS")
+                keyAlias "iv234"
+                keyPassword System.getenv("KS_PASS")
+            }
+        }
+    }
+    defaultConfig {
+        applicationId "com.iv234.schedule"
+        minSdk 24
+        targetSdk 34
+        versionCode Integer.parseInt((project.findProperty("appCode") ?: "1").toString())
+        versionName (project.findProperty("appVersion") ?: "1.0").toString()
+    }
+    buildTypes {
+        debug {
+            debuggable false
+            if (System.getenv("KS_FILE")) {
+                signingConfig signingConfigs.mine
+            }
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
 }
