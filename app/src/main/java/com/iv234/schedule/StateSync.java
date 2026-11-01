@@ -68,12 +68,10 @@ final class StateSync {
         }
     }
 
+    /** Новее только по номеру версии: время на разных устройствах может расходиться. */
     static boolean isNewerState(String a, String b) {
         try {
-            JSONObject x = new JSONObject(a), y = new JSONObject(b);
-            String ax = x.optString("at", ""), ay = y.optString("at", "");
-            if (!ax.isEmpty() && !ay.isEmpty()) return ax.compareTo(ay) > 0;
-            return x.optInt("rev", 0) > y.optInt("rev", 0);
+            return new JSONObject(a).optInt("rev", 0) > new JSONObject(b).optInt("rev", 0);
         } catch (Exception e) {
             return true;
         }

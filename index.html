@@ -395,7 +395,7 @@ applyState(lg("iv_state"));
 let MY=lg("iv_my")||{}; // личные правки пользователя (только на этом устройстве)
 {const t=lg("iv_gh");if(t&&t.token){tok=t.token;tuser=t.user}}
 // принимаем только БОЛЕЕ НОВОЕ состояние: устаревшие копии из кэша GitHub игнорируются
-const newer=s=>{const a=s.at||"";return a&&stAt?a>stAt:(+s.rev||0)>rev};
+const newer=s=>(+s.rev||0)>rev; // только по номеру версии: время на устройствах может расходиться
 async function pull(){
   if(IN_APP)return;
   try{

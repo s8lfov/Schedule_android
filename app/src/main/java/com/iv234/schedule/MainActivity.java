@@ -142,10 +142,13 @@ public class MainActivity extends Activity {
     private void fetchState() {
         new Thread(() -> {
             Context app = getApplicationContext();
-            String clean = StateSync.fetchAndStore(app);
-            if (clean == null) return; // нет интернета или данные не новее — остаётся сохранённая копия
-            StateSync.notifyIfNew(app, clean, false); // приложение открыто: уведомление покажет сама страница
-            runOnUiThread(() -> pushState(clean));
+            String fresh = StateSync.fetchAndStore(app);
+            if (fresh != null) StateSync.notifyIfNew(app, fresh, false); // приложение открыто: уведомление покажет сама страница
+            // если новее ничего нет, всё равно сверяем страницу с сохранённой копией
+            // (её мог обновить фоновый процесс); страница сама проигнорирует то, что не новее
+            final String show = fresh != null ? fresh
+                    : app.getSharedPreferences("s", MODE_PRIVATE).getString("state", null);
+            if (show != null) runOnUiThread(() -> pushState(show));
         }).start();
     }
 
