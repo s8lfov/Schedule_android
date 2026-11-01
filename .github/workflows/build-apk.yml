@@ -10,6 +10,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+      - name: Check project files (and fix root build.gradle)
+        run: |
+          echo "=== root build.gradle (before) ==="; cat build.gradle || true
+          printf "plugins {\n    id 'com.android.application' version '8.5.2' apply false\n}\n" > build.gradle
+          echo "=== app/build.gradle (first lines) ==="; head -n 6 app/build.gradle || echo "app/build.gradle NOT FOUND"
+          echo "=== files ==="; ls -la . app app/src/main || true
       - uses: actions/setup-java@v5
         with:
           distribution: temurin

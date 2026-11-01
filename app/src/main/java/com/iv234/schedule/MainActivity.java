@@ -134,6 +134,7 @@ public class MainActivity extends Activity {
 
     /** Передаёт проверенный JSON странице как обычную строку-данные. */
     private void pushState(String json) {
+        if (isFinishing() || isDestroyed()) return;
         String lit = JSONObject.quote(json).replace("\u2028", "\\u2028").replace("\u2029", "\\u2029");
         web.evaluateJavascript("window.__setState&&window.__setState(" + lit + ")", null);
     }
@@ -148,25 +149,42 @@ public class MainActivity extends Activity {
         }).start();
     }
 
-    /** Разрешение на уведомления (Android 13+) и редкая фоновая проверка. */
+    /**
+     * Разрешение на уведомления (Android 13+) и редкая фоновая проверка.
+     * Любой сбой здесь не должен ронять приложение: тогда оно просто работает без уведомлений.
+     */
     private void setupNotices() {
-        if (Build.VERSION.SDK_INT >= 33
-                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+        try {
+            if (Build.VERSION.SDK_INT >= 33
+                    && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
+        } catch (Throwable ignored) {
         }
-        JobScheduler js = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-        if (js == null) return;
-        if (!BACKGROUND_NOTICES) {
-            js.cancel(1);
-            return;
-        }
-        if (js.getPendingJob(1) == null) {
-            js.schedule(new JobInfo.Builder(1, new ComponentName(this, NoticeJobService.class))
-                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                    .setPeriodic(30L * 60 * 1000)
-                    .setPersisted(true)
-                    .build());
+        try {
+            JobScheduler js = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+            if (js == null) return;
+            if (!BACKGROUND_NOTICES) {
+                js.cancel(1);
+                return;
+            }
+            if (js.getPendingJob(1) != null) return;
+            ComponentName cn = new ComponentName(this, NoticeJobService.class);
+            try {
+                js.schedule(new JobInfo.Builder(1, cn)
+                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                        .setPeriodic(30L * 60 * 1000)
+                        .setPersisted(true)
+                        .build());
+            } catch (Throwable e) { // нет права на запуск после перезагрузки — планируем без него
+                js.schedule(new JobInfo.Builder(1, cn)
+                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                        .setPeriodic(30L * 60 * 1000)
+                        .build());
+            }
+        } catch (Throwable ignored) {
+            // фоновая проверка недоступна (например, служба не объявлена в манифесте)
         }
     }
 
