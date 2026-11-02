@@ -43,3 +43,8 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 }
+
+dependencies {
+    // Библиотека для реализации жеста «тяни вниз для обновления» (SwipeRefreshLayout)
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+}
