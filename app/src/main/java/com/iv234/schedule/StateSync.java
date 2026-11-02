@@ -33,16 +33,19 @@ final class StateSync {
     static String fetchAndStore(Context ctx) {
         HttpURLConnection c = null;
         try {
-            // Добавлен динамический параметр времени для обхода кэша CDN GitHub
+            // Динамический параметр времени для обхода кэша CDN GitHub
             URL u = new URL(DATA_URL + "?t=" + System.currentTimeMillis());
             if (!"https".equals(u.getProtocol()) || !DATA_HOST.equals(u.getHost())) return null;
             c = (HttpURLConnection) u.openConnection();
-            c.setInstanceFollowRedirects(false);   // не идём по перенаправлениям
+            
+            // ИСПРАВЛЕНИЕ: разрешаем перенаправления (GitHub отдаёт файлы через CDN с кодом 302/301)
+            c.setInstanceFollowRedirects(true);   
+            
             c.setConnectTimeout(6000);
             c.setReadTimeout(6000);
             c.setUseCaches(false);
             
-            // Дополнительные заголовки для предотвращения кэширования ответов
+            // Заголовки для предотвращения кэширования ответов
             c.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
             c.setRequestProperty("Pragma", "no-cache");
             c.setRequestProperty("Expires", "0");
