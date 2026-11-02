@@ -25,36 +25,20 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 
-/**
- * Модель безопасности:
- *  - внутри WebView работает только страница, зашитая в APK (file:///android_asset);
- *  - WebView блокирует любые адреса, кроме api.github.com (и только для админ-панели; отключается ADMIN_IN_APP);
- *  - из интернета приложение скачивает только файл schedule.json с расписанием, сама Java-часть
- *    проверяет его и пересобирает; ни HTML, ни скриптов, ни файлов с сайта не загружается;
- *  - последняя удачно проверенная копия хранится на устройстве и работает без интернета.
- */
 public class MainActivity extends Activity {
-    // Файл с расписанием в репозитории GitHub (его обновляют админы через админ-панель на сайте)
     private static final String DATA_HOST = "raw.githubusercontent.com";
     private static final String DATA_URL =
             "https://raw.githubusercontent.com/s8lfov/Schedule_android/main/schedule.json";
     private static final String ASSET_URL = "file:///android_asset/index.html";
-    // true — админ-панель работает и в приложении (WebView получает доступ только к api.github.com).
-    // false — приложение полностью отрезано от сети (админ правит расписание на сайте).
     private static final boolean ADMIN_IN_APP = true;
-    // true — раз в ~30 минут в фоне проверять, не отправил ли админ уведомление об изменении расписания
     private static final boolean BACKGROUND_NOTICES = true;
-    private static final int MAX_BYTES = 200 * 1024;
     private static final long POLL_MS = 2 * 60 * 1000;
 
-    // true — раз в 12 часов проверять новую версию APK на GitHub (только показывает окно, ничего не ставит)
     private static final boolean CHECK_UPDATES = true;
     private static final long CHECK_EVERY_MS = 12L * 60 * 60 * 1000;
     private static final String REPO = "s8lfov/Schedule_android";
@@ -85,8 +69,8 @@ public class MainActivity extends Activity {
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
-        s.setBlockNetworkLoads(!ADMIN_IN_APP); // без админ-панели WebView физически не может ходить в сеть
-        s.setAllowFileAccess(false);           // доступ к файлам телефона закрыт (assets работают)
+        s.setBlockNetworkLoads(!ADMIN_IN_APP);
+        s.setAllowFileAccess(false);
         s.setAllowContentAccess(false);
         s.setAllowFileAccessFromFileURLs(false);
         s.setAllowUniversalAccessFromFileURLs(false);
@@ -97,14 +81,13 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
-                // единственное исключение: вложения (фото/PDF) из нашей папки files/ открываются во внешнем браузере
                 Uri u = r.getUrl();
                 if ("https".equals(u.getScheme()) && "raw.githubusercontent.com".equals(u.getHost())
                         && u.getPath() != null
                         && u.getPath().startsWith("/s8lfov/Schedule_android/main/files/")) {
                     try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { }
                 }
-                return true; // остальные переходы по ссылкам заблокированы
+                return true;
             }
 
             @Override
@@ -112,7 +95,7 @@ public class MainActivity extends Activity {
                 String u = r.getUrl().toString();
                 if (u.startsWith("file:///android_asset/") || u.startsWith("data:")) return null;
                 if (ADMIN_IN_APP && "https".equals(r.getUrl().getScheme())
-                        && "api.github.com".equals(r.getUrl().getHost())) return null; // только для админ-панели
+                        && "api.github.com".equals(r.getUrl().getHost())) return null;
                 return new WebResourceResponse("text/plain", "utf-8",
                         new ByteArrayInputStream(new byte[0]));
             }
@@ -120,8 +103,10 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView v, String url) {
                 String cached = getSharedPreferences("s", MODE_PRIVATE).getString("state", null);
-                if (cached != null) pushState(cached); // последняя сохранённая копия (работает без интернета)
+                if (cached != null) pushState(cached);
                 if (ADMIN_IN_APP) web.evaluateJavascript("window.__enableAdmin&&window.__enableAdmin()", null);
+                // Принудительно запрашиваем свежие данные с сайта сразу при загрузке страницы
+                fetchState();
             }
         });
 
@@ -132,7 +117,6 @@ public class MainActivity extends Activity {
         setupNotices();
     }
 
-    /** Передаёт проверенный JSON странице как обычную строку-данные. */
     private void pushState(String json) {
         if (isFinishing() || isDestroyed()) return;
         String lit = JSONObject.quote(json).replace("\u2028", "\\u2028").replace("\u2029", "\\u2029");
@@ -143,19 +127,13 @@ public class MainActivity extends Activity {
         new Thread(() -> {
             Context app = getApplicationContext();
             String fresh = StateSync.fetchAndStore(app);
-            if (fresh != null) StateSync.notifyIfNew(app, fresh, false); // приложение открыто: уведомление покажет сама страница
-            // если новее ничего нет, всё равно сверяем страницу с сохранённой копией
-            // (её мог обновить фоновый процесс); страница сама проигнорирует то, что не новее
+            if (fresh != null) StateSync.notifyIfNew(app, fresh, false);
             final String show = fresh != null ? fresh
                     : app.getSharedPreferences("s", MODE_PRIVATE).getString("state", null);
             if (show != null) runOnUiThread(() -> pushState(show));
         }).start();
     }
 
-    /**
-     * Разрешение на уведомления (Android 13+) и редкая фоновая проверка.
-     * Любой сбой здесь не должен ронять приложение: тогда оно просто работает без уведомлений.
-     */
     private void setupNotices() {
         try {
             if (Build.VERSION.SDK_INT >= 33
@@ -163,8 +141,7 @@ public class MainActivity extends Activity {
                     != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
             }
-        } catch (Throwable ignored) {
-        }
+        } catch (Throwable ignored) {}
         try {
             JobScheduler js = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
             if (js == null) return;
@@ -174,21 +151,12 @@ public class MainActivity extends Activity {
             }
             if (js.getPendingJob(1) != null) return;
             ComponentName cn = new ComponentName(this, NoticeJobService.class);
-            try {
-                js.schedule(new JobInfo.Builder(1, cn)
-                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                        .setPeriodic(30L * 60 * 1000)
-                        .setPersisted(true)
-                        .build());
-            } catch (Throwable e) { // нет права на запуск после перезагрузки — планируем без него
-                js.schedule(new JobInfo.Builder(1, cn)
-                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                        .setPeriodic(30L * 60 * 1000)
-                        .build());
-            }
-        } catch (Throwable ignored) {
-            // фоновая проверка недоступна (например, служба не объявлена в манифесте)
-        }
+            js.schedule(new JobInfo.Builder(1, cn)
+                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                    .setPeriodic(30L * 60 * 1000)
+                    .setPersisted(true)
+                    .build());
+        } catch (Throwable ignored) {}
     }
 
     @Override
@@ -208,7 +176,9 @@ public class MainActivity extends Activity {
             shownDay = today();
             web.reload();
         }
-        handler.post(poll); // сразу обновляем и дальше раз в 2 минуты, пока приложение открыто
+        // Немедленно подтягиваем свежие данные из сети при разблокировке или возвращении в приложение
+        fetchState();
+        handler.post(poll);
     }
 
     private void checkForUpdate() {
@@ -244,17 +214,6 @@ public class MainActivity extends Activity {
                 if (c != null) c.disconnect();
             }
         }).start();
-    }
-
-    private static boolean isNewerState(String a, String b) {
-        try {
-            JSONObject x = new JSONObject(a), y = new JSONObject(b);
-            String ax = x.optString("at", ""), ay = y.optString("at", "");
-            if (!ax.isEmpty() && !ay.isEmpty()) return ax.compareTo(ay) > 0;
-            return x.optInt("rev", 0) > y.optInt("rev", 0);
-        } catch (Exception e) {
-            return true;
-        }
     }
 
     private static boolean isNewer(String latest, String current) {

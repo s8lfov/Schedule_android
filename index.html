@@ -92,14 +92,12 @@ td.now::before,td.next::before,.cp.now::before,.cp.next::before{content:attr(dat
 .am{margin-top:6px;color:var(--accent);font-weight:600}
 .shoe{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:999px;color:var(--accent);font-size:12px;font-weight:600;background:linear-gradient(135deg,var(--gl1),var(--gl2) 45%,var(--glt));border:1px solid rgba(255,255,255,.5);box-shadow:inset 0 1px 1px rgba(255,255,255,.75),0 2px 8px rgba(109,40,217,.15);-webkit-backdrop-filter:blur(8px) saturate(1.5);backdrop-filter:blur(8px) saturate(1.5)}
 .tg{display:flex;gap:8px;align-items:center;margin:8px 0}
-/* текущая пара: на ПК — рамка с отступом от текста, на телефоне (карточки) — заливка */
 td.now{outline:2px solid var(--accent);outline-offset:-6px;border-radius:12px}
 td.next{outline:1px dashed var(--accent);outline-offset:-3px;border-radius:0}
 .cp.now{background:var(--accent);color:#fff;border-radius:12px;padding:8px 10px;margin:2px -4px;border-top-color:transparent}
 .cp.now .ct,.cp.now .ct b,.cp.now .t,.cp.now .r,.cp.now::before{color:#fff}
 .cp.now .shoe{background:linear-gradient(135deg,rgba(255,255,255,.4),rgba(255,255,255,.12));border-color:rgba(255,255,255,.55);color:#fff}
 .cp.next{outline:1px dashed var(--accent);outline-offset:-3px;border-radius:10px}
-/* Liquid Glass */
 body{background:radial-gradient(900px 500px at 8% -8%,rgba(109,40,217,.2),transparent),radial-gradient(800px 520px at 100% 0,rgba(236,72,153,.12),transparent),var(--bg);background-attachment:fixed}
 dialog{background:var(--glass);-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 24px 60px rgba(40,20,90,.3)}
 dialog::backdrop{background:rgba(35,20,70,.3);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
@@ -118,28 +116,22 @@ dialog::backdrop{background:rgba(35,20,70,.3);-webkit-backdrop-filter:blur(5px);
 #menu[hidden]{display:none}
 #menu button{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;border:0;box-shadow:none;text-align:left;width:100%;padding:11px 12px;border-radius:12px}
 #menu button:hover{background:var(--hl)}
-/* Liquid Glass: акценты (текущий день, пара, неделя) */
-/* стекло — это фон самой ячейки таблицы: форма строго по ячейке, текст остаётся чётким */
 td.now,th.today{background:linear-gradient(135deg,var(--gl1),var(--gl2) 46%,var(--glt));box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 1px 1px rgba(255,255,255,.75),inset 0 -12px 22px var(--glt)}
 .scroll{position:relative}
 td.now{outline:none;position:relative;border-radius:0}
-/* вложения */
 .cp{position:relative}
 #tbl td[data-k]{position:relative}
 .tri{position:absolute;top:0;right:0;width:0;height:0;padding:0;border-style:solid;border-width:26px 0 0 26px;border-color:var(--accent) transparent transparent transparent;background:none;box-shadow:none;border-radius:0;z-index:3;cursor:pointer;-webkit-backdrop-filter:none;backdrop-filter:none}
 body.adm td[data-k],body.adm .cp[data-k]{cursor:pointer}
 .fimg{max-width:100%;border-radius:12px;margin:6px 0;display:block}
 .fi{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
-/* Liquid Glass: цифра недели и подпись текущего дня */
 th.today{position:relative}
 .hero .num{color:transparent;background:none;-webkit-text-stroke:2px var(--gstroke);filter:drop-shadow(0 0 10px rgba(139,92,246,.55)) drop-shadow(0 6px 14px rgba(109,40,217,.35)) drop-shadow(0 -1px 0 rgba(255,255,255,.5))}
-/* стрелка «наверх»: только в мобильной версии, появляется при прокрутке вниз */
 #toTop{display:none}
 @media (max-width:760px){
   #toTop{display:flex;align-items:center;justify-content:center;position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:48px;height:48px;padding:0;border-radius:50%;z-index:15;color:var(--accent);background:var(--glass);-webkit-backdrop-filter:blur(14px) saturate(1.6);backdrop-filter:blur(14px) saturate(1.6);border:1px solid rgba(255,255,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 6px 18px rgba(40,20,90,.25);opacity:0;pointer-events:none;transform:translateY(12px);transition:opacity .2s,transform .2s}
   #toTop.show{opacity:1;pointer-events:auto;transform:none}
 }
-/* уведомление об изменении расписания */
 #notice{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 0;padding:10px 14px;border-radius:16px;font-size:14px;background:var(--glass);-webkit-backdrop-filter:blur(14px) saturate(1.6);backdrop-filter:blur(14px) saturate(1.6);border:1px solid rgba(255,255,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 6px 18px rgba(40,20,90,.15)}
 #notice[hidden]{display:none}
 #notice span{flex:1 1 220px}
@@ -158,7 +150,7 @@ th.today{position:relative}
         <button id="notifbtn" hidden>🔔 Уведомления в браузере</button>
       </div>
     </div>
-    <button id="admbtn">⚙ Админ</button>
+    <button id="admbtn" style="display:none">⚙ Админ</button>
   </div>
   <div id="notice" hidden></div>
   <div class="hero">
@@ -183,8 +175,6 @@ th.today{position:relative}
 </div>
 <script>
 const DAYS=["Понедельник","Вторник","Среда","Четверг","Пятница"];
-const T={fk:["Физ.культура","Волков В.В."]};
-// [пара, день(0-4), название, аудитория, недели, преподаватель]
 const L=[
 [1,0,"Физ.культура","","4,6,8,13-15","Волков В.В."],
 [1,0,"МДК.05.01.","106л","5,7,9,16","Лукьянова С.П."],
@@ -231,11 +221,11 @@ L.forEach(l=>l.w=parseWeeks(l[4]));
 const DAY=864e5;
 const utc=d=>Date.UTC(d.getFullYear(),d.getMonth(),d.getDate());
 let now=new Date(),dow,effDay,realWeek,todayIdx,inRange;
-const year=2026; // расписание действует только в 2026 году
+const year=2026;
 const sep1=new Date(year,8,1);
-const mon1=utc(sep1)-((sep1.getDay()+6)%7)*DAY; // понедельник недели с 1 сентября
-const START=Date.UTC(2026,8,1), END=Date.UTC(2026,11,31); // период: 1 сентября – 31 декабря 2026
-const maxWeek=Math.floor((END-mon1)/DAY/7)+1; // последняя неделя, начинающаяся в 2026
+const mon1=utc(sep1)-((sep1.getDay()+6)%7)*DAY;
+const START=Date.UTC(2026,8,1), END=Date.UTC(2026,11,31);
+const maxWeek=Math.floor((END-mon1)/DAY/7)+1;
 function calcNow(){now=new Date();dow=(now.getDay()+6)%7;effDay=utc(now)+(dow>=5?(7-dow)*DAY:0);realWeek=Math.floor((effDay-mon1)/DAY/7)+1;todayIdx=dow;inRange=utc(now)>=START&&utc(now)<=END}
 const homeW=()=>inRange?realWeek:(utc(now)<START?1:maxWeek);
 calcNow();let week=homeW();
@@ -243,7 +233,7 @@ calcNow();let week=homeW();
 const fmt=t=>new Date(t).toLocaleDateString("ru-RU",{day:"numeric",month:"long",timeZone:"UTC"});
 
 function render(){
-  const start=mon1+(week-1)*7*DAY, end=start+4*DAY; // только будни (Пн–Пт)
+  const start=mon1+(week-1)*7*DAY, end=start+4*DAY;
   document.getElementById("num").textContent=week;
   document.getElementById("prev").disabled=week<=1;
   document.getElementById("next").disabled=week>=maxWeek;
@@ -295,13 +285,16 @@ function render(){
 document.getElementById("prev").onclick=()=>{if(week>1){week--;render()}};
 document.getElementById("next").onclick=()=>{if(week<maxWeek){week++;render()}};
 document.getElementById("cur").onclick=()=>{calcNow();week=homeW();render()};
-// ===== Звонки =====
+
+// ===== Звонки (Раздельные для Вторника, Среды и Пятницы) =====
 const G={
  mon:{name:"Понедельник",rows:[["Поднятие флага","8:15–8:25","по графику"],["Разговоры о важном","8:30–9:15","9:15–9:25"],["1","9:25–10:55","10:55–11:05"],["2","11:05–12:35","12:35–13:05",1],["3","13:05–14:35","14:35–14:45"],["4","14:45–16:15","16:15–16:25"],["5","16:25–17:55","17:55–18:05"],["6","18:05–19:35","—"]]},
- vsp:{name:"Вторник, среда, пятница",rows:[["1","8:30–10:00","10:00–10:10"],["2","10:10–11:40","11:40–12:10",1],["3","12:10–13:40","13:40–13:50"],["4","13:50–15:20","15:20–15:30"],["5","15:30–17:00","17:00–17:10"],["6","17:10–18:40","18:40–18:50"],["7","18:50–20:20","—"]]},
- thu:{name:"Четверг",rows:[["1","8:30–10:00","10:00–10:10"],["2","10:10–11:40","11:40–12:10",1],["Классный час","12:10–12:55","12:55–13:00"],["3","13:00–14:30","14:30–14:40"],["4","14:40–16:10","16:10–16:20"],["5","16:20–17:50","17:50–18:00"],["6","18:00–19:30","—"]]}
+ tue:{name:"Вторник",rows:[["1","8:30–10:00","10:00–10:10"],["2","10:10–11:40","11:40–12:10",1],["3","12:10–13:40","13:40–13:50"],["4","13:50–15:20","15:20–15:30"],["5","15:30–17:00","17:00–17:10"],["6","17:10–18:40","18:40–18:50"],["7","18:50–20:20","—"]]},
+ wed:{name:"Среда",rows:[["1","8:30–10:00","10:00–10:10"],["2","10:10–11:40","11:40–12:10",1],["3","12:10–13:40","13:40–13:50"],["4","13:50–15:20","15:20–15:30"],["5","15:30–17:00","17:00–17:10"],["6","17:10–18:40","18:40–18:50"],["7","18:50–20:20","—"]]},
+ thu:{name:"Четверг",rows:[["1","8:30–10:00","10:00–10:10"],["2","10:10–11:40","11:40–12:10",1],["Классный час","12:10–12:55","12:55–13:00"],["3","13:00–14:30","14:30–14:40"],["4","14:40–16:10","16:10–16:20"],["5","16:20–17:50","17:50–18:00"],["6","18:00–19:30","—"]]},
+ fri:{name:"Пятница",rows:[["1","8:30–10:00","10:00–10:10"],["2","10:10–11:40","11:40–12:10",1],["3","12:10–13:40","13:40–13:50"],["4","13:50–15:20","15:20–15:30"],["5","15:30–17:00","17:00–17:10"],["6","17:10–18:40","18:40–18:50"],["7","18:50–20:20","—"]]}
 };
-const gk=i=>i===0?"mon":i===3?"thu":"vsp";
+const gk=i=>["mon","tue","wed","thu","fri"][i]||"mon";
 const SHORT=["Пн","Вт","Ср","Чт","Пт"];
 let bsel=todayIdx<5?todayIdx:0;
 const mins=s=>{const[h,m]=s.split(":").map(Number);return h*60+m};
@@ -321,7 +314,7 @@ function renderBells(){
   document.getElementById("tabs").innerHTML=t;
   let c="";
   if(bsel==="all"){
-    c=["mon","vsp","thu"].map(k=>`<div class="bh">${esc(G[k].name)}</div>`+btable(k,false)).join("");
+    c=["mon","tue","wed","thu","fri"].map(k=>`<div class="bh">${esc(G[k].name)}</div>`+btable(k,false)).join("");
   }else{
     c=`<div class="bh">${DAYS[bsel]}</div>`+btable(gk(bsel),bsel===todayIdx);
   }
@@ -332,7 +325,7 @@ document.getElementById("bells").onclick=()=>{bsel=todayIdx<5?todayIdx:0;renderB
 document.getElementById("x").onclick=()=>dlg.close();
 dlg.addEventListener("click",e=>{if(e.target===dlg)dlg.close()});
 document.getElementById("tabs").onclick=e=>{const i=e.target.dataset.i;if(i===undefined)return;bsel=i==="all"?"all":+i;renderBells()};
-// ===== Праздники (производственный календарь РФ 2026, сентябрь–декабрь) =====
+
 const iso=t=>new Date(t).toISOString().slice(0,10);
 const HOL={"2026-11-04":"День народного единства","2026-12-31":"Выходной день (перенос с 4 января)"};
 function holBox(name,d,has,cancel){
@@ -356,21 +349,21 @@ function openHol(d){
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".seeb[data-d]");if(b)openHol(+b.dataset.d)});
 document.getElementById("x2").onclick=()=>dlg2.close();
 dlg2.addEventListener("click",e=>{if(e.target===dlg2)dlg2.close()});
-// ===== Состояние с сервера, текущая пара, админ-панель =====
+
 const cp0=o=>JSON.parse(JSON.stringify(o));
 const G0=cp0(G);
-// Данные расписания лежат в файле schedule.json в репозитории GitHub (репозиторий должен быть публичным).
 const GH_REPO="s8lfov/Schedule_android",GH_BRANCH="main",GH_FILE="schedule.json";
 const ADMINS=["s8lfov","deft-airspace"];
 const DATA_URL="https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_BRANCH+"/"+GH_FILE;
 const ghH=t=>({"Authorization":"Bearer "+t,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"});
-const IN_APP=location.protocol==="file:"; // внутри APK данные приходят только из приложения
+const IN_APP=location.protocol==="file:";
 let OV={},SH={},ATT={},NOTICE=null,rev=0,stAt="",tok=null,tuser="";
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const lg=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const ls=(k,v)=>{try{v===undefined?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 const AEXT=["jpg","png","webp","pdf"],FILES_DIR="files";
-function cleanAtt(a){ // берём только вложения строго нужной формы (адрес всегда внутри папки files/)
+
+function cleanAtt(a){
   const o={};if(!a||typeof a!=="object")return o;let n=0;
   for(const k in a){if(!/^\d{4}-\d{2}-\d{2}$/.test(k)||!a[k]||typeof a[k]!=="object")continue;
     for(const p in a[k]){if(!/^[1-5]$/.test(p)||!Array.isArray(a[k][p]))continue;
@@ -380,7 +373,7 @@ function cleanAtt(a){ // берём только вложения строго �
           ((o[k]=o[k]||{})[p]=o[k][p]||[]).push({n:nm||"файл",u:x.u,t:x.t});n++}}}}
   return o;
 }
-function cleanNotice(n){ // уведомление админа: только нужные поля и безопасный текст
+function cleanNotice(n){
   if(!n||typeof n!=="object")return null;
   const ok=(v,m)=>typeof v==="string"&&v.length<=m;
   if(!ok(n.id,24)||!/^[A-Za-z0-9_-]{4,24}$/.test(n.id)||!/^\d{4}-\d{2}-\d{2}$/.test(n.d||"")||!ok(n.t,140))return null;
@@ -388,19 +381,19 @@ function cleanNotice(n){ // уведомление админа: только н
 }
 function applyState(s){
   if(!s||typeof s!=="object")return false;
-  for(const k of["mon","vsp","thu"]){const g=s.bells&&s.bells[k];G[k].rows=g&&Array.isArray(g.rows)?cp0(g.rows):cp0(G0[k].rows)}
+  for(const k of["mon","tue","wed","thu","fri"]){const g=s.bells&&s.bells[k];G[k].rows=g&&Array.isArray(g.rows)?cp0(g.rows):cp0(G0[k].rows)}
   OV=s.ov&&typeof s.ov==="object"?s.ov:{};SH=s.sh&&typeof s.sh==="object"?s.sh:{};ATT=cleanAtt(s.att);NOTICE=cleanNotice(s.notice);rev=+s.rev||0;stAt=s.at||"";return true;
 }
 applyState(lg("iv_state"));
-let MY=lg("iv_my")||{}; // личные правки пользователя (только на этом устройстве)
+let MY=lg("iv_my")||{};
 {const t=lg("iv_gh");if(t&&t.token){tok=t.token;tuser=t.user}}
-// принимаем только БОЛЕЕ НОВОЕ состояние: устаревшие копии из кэша GitHub игнорируются
-const newer=s=>(+s.rev||0)>rev; // только по номеру версии: время на устройствах может расходиться
+const newer=s=>(+s.rev||0)>rev;
+
 async function pull(){
   if(IN_APP)return;
   try{
     const r=await fetch(DATA_URL+"?t="+Date.now(),{cache:"no-store"});
-    if(!r.ok)return; // файла ещё нет или GitHub недоступен — остаётся то, что уже показано
+    if(!r.ok)return;
     const s=await r.json();
     if(newer(s)){applyState(s);ls("iv_state",s);render()}
   }catch(e){}
@@ -409,11 +402,10 @@ window.__setState=t=>{try{const s=JSON.parse(t);if(newer(s)){applyState(s);rende
 const lesHtml=l=>`<div class="les"><b>${esc(l[2])}</b>${l[3]?`<span class="r">каб. ${esc(l[3])}</span>`:""}<div class="t">${esc(l[5])}</div>${SH[l[2]+"|"+l[5]]?'<span class="shoe">👟 нужна сменка</span>':""}</div>`;
 const weekOf=t=>Math.floor((t-mon1)/DAY/7)+1;
 function lessonsFor(p,d,t,noMy){const o=(!noMy&&MY[iso(t)])||OV[iso(t)];if(o)return(o[p]||[]).map(x=>[p,d,x[0],x[1],"",x[2]]);return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
-function hasLessons(d,t){return[1,2,3,4,5].some(p=>lessonsFor(p,d,t).length)}
 function baseLessons(p,d,t){return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
 function hasPlanned(d,t){return[1,2,3,4,5].some(p=>baseLessons(p,d,t).length)}
-// день отменён админом: правка есть, но все пары убраны (личные правки пользователя в приоритете)
 function isCancel(t){const k=iso(t),o=OV[k];return!MY[k]&&!!o&&[1,2,3,4,5].every(p=>!(o[p]&&o[p].length))}
+
 function curPair(){
   if(!(inRange&&week===realWeek)||todayIdx>4||HOL[iso(utc(now))])return null;
   const m=now.getHours()*60+now.getMinutes(),t=utc(now);let nx=null;
@@ -427,15 +419,17 @@ function curPair(){
 }
 const cls=(c,d,p)=>c&&d===todayIdx&&c.p===p?" "+c.s:"";
 const bat=(c,d,p)=>c&&d===todayIdx&&c.p===p?` data-b="${c.s==="now"?"идёт до ":"следующая в "}${esc(c.t)}"`:"";
+
 function tickNow(){const was=week===realWeek;calcNow();if(was)week=homeW();render()}
 setInterval(()=>{if(!document.hidden)tickNow()},30000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)tickNow()});
-
 setInterval(()=>{if(!document.hidden)pull()},90000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
 pull();
+
 const b64e=t=>btoa(unescape(encodeURIComponent(t)));
 const b64d=t=>decodeURIComponent(escape(atob(t.replace(/\s/g,""))));
+
 async function push(){
   const url="https://api.github.com/repos/"+GH_REPO+"/contents/"+GH_FILE;
   const revert=async()=>{rev=-1;stAt="";await pull()};
@@ -446,8 +440,14 @@ async function push(){
     if(g.ok){const j=await g.json();sha=j.sha;try{srv=JSON.parse(b64d(j.content))}catch(e){srv=null}}
     else if(g.status!==404){await revert();return"Ошибка чтения ("+g.status+")"}
     const cur=srv?(+srv.rev||0):0;
-    if(cur!==rev){if(srv){applyState(srv);ls("iv_state",srv);render()}return"Расписание только что изменил другой админ. Данные обновлены — повторите правку"}
-    const next={rev:cur+1,bells:{mon:G.mon,vsp:G.vsp,thu:G.thu},ov:OV,sh:SH,att:ATT,notice:NOTICE,by:tuser,at:new Date().toISOString()};
+    if(cur!==rev){
+      if(srv){
+        applyState(srv);ls("iv_state",srv);render();
+        if(srv.by&&srv.by.toLowerCase()===tuser.toLowerCase()){rev=cur}
+        else{return"Расписание только что изменил другой админ. Данные обновлены — повторите правку"}
+      }
+    }
+    const next={rev:Math.max(cur,rev)+1,bells:{mon:G.mon,tue:G.tue,wed:G.wed,thu:G.thu,fri:G.fri},ov:OV,sh:SH,att:ATT,notice:NOTICE,by:tuser,at:new Date().toISOString()};
     const body={message:"Расписание: правка от "+tuser,content:b64e(JSON.stringify(next)),branch:GH_BRANCH};
     if(sha)body.sha=sha;
     const p=await fetch(url,{method:"PUT",headers:{...ghH(tok),"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -458,11 +458,13 @@ async function push(){
     return"Сохранено. У друзей обновится в течение пары минут";
   }catch(e){return"Нет связи с GitHub"}
 }
+
 const dlgA=document.getElementById("dlgA"),ac=document.getElementById("ac");
 let atab="day",aiso="",edit={},bedit={},she={},amsg="",umode=false,cat=[];
 const dIdx=t=>(new Date(t).getUTCDay()+6)%7;
 function defaultIso(){const t=utc(now)+(dow>=5?(7-dow)*DAY:0);return iso(Math.min(Math.max(t,START),END))}
 function loadDay(){const t=Date.parse(aiso+"T00:00:00Z");edit={};if(isNaN(t)||dIdx(t)>4)return;for(let p=1;p<=5;p++)edit[p]=lessonsFor(p,dIdx(t),t,!umode).map(l=>[l[2],l[3],l[5]])}
+
 function dayHtml(){
   const t=Date.parse(aiso+"T00:00:00Z");
   let h=`<div class="ar"><input type="date" id="ad" value="${esc(aiso)}" min="2026-09-01" max="2026-12-31"></div>`;
@@ -476,27 +478,36 @@ function dayHtml(){
   if(!umode)h+=`<div class="ap"><b>Уведомление об изменении</b><div class="t">Отправляет всем сообщение, что расписание на этот день изменено: оно появится на сайте и придёт уведомлением в приложение. Сначала сохраните изменения дня.</div><div class="ar"><input id="ncomm" maxlength="100" placeholder="Комментарий (необязательно)"><button class="seeb" data-a="notify">🔔 Отправить уведомление</button></div></div>`;
   return h;
 }
+
 function bellsHtml(){
-  return["mon","vsp","thu"].map(k=>`<div class="ap"><b>${esc(G[k].name)}</b>`+bedit[k].map((r,i)=>`<div class="br" data-g="${k}"><input class="s" value="${esc(r[0])}" title="№ пары или название"><input value="${esc(r[1])}" placeholder="9:25–10:55"><input value="${esc(r[2])}" placeholder="перемена"><label class="t"><input type="checkbox" ${r[3]?"checked":""}>бол.</label><button data-a="bdel" data-g="${k}" data-i="${i}">✕</button></div>`).join("")+`<button data-a="badd" data-g="${k}">+ строка</button></div>`).join("")+`<div class="ar"><button class="seeb" data-a="savebells">Сохранить звонки</button><button data-a="resetbells">Стандартные</button></div><div class="t">Время: 9:25–10:55. Строки с цифрой в первом поле считаются парами и используются для подсветки текущей пары.</div>`;
+  return["mon","tue","wed","thu","fri"].map(k=>`<div class="ap"><b>${esc(G[k].name)}</b>`+bedit[k].map((r,i)=>`<div class="br" data-g="${k}"><input class="s" value="${esc(r[0])}" title="№ пары или название"><input value="${esc(r[1])}" placeholder="9:25–10:55"><input value="${esc(r[2])}" placeholder="перемена"><label class="t"><input type="checkbox" ${r[3]?"checked":""}>бол.</label><button data-a="bdel" data-g="${k}" data-i="${i}">✕</button></div>`).join("")+`<button data-a="badd" data-g="${k}">+ строка</button></div>`).join("")+`<div class="ar"><button class="seeb" data-a="savebells">Сохранить звонки</button><button data-a="resetbells">Стандартные</button></div><div class="t">Время: 9:25–10:55. Строки с цифрой в первом поле считаются парами и используются для подсветки текущей пары.</div>`;
 }
+
 function tagsHtml(){
   const m=new Map();
   L.forEach(l=>m.set(l[2]+"|"+l[5],[l[2],l[5]]));
   Object.values(OV).forEach(d=>{for(const p in d)d[p].forEach(x=>m.set(x[0]+"|"+x[2],[x[0],x[2]]))});
   return`<div class="t">Метка «нужна сменка» привязана к предмету и преподавателю: она показывается у всех пар с таким сочетанием.</div>`+[...m].sort((a,b)=>a[0].localeCompare(b[0],"ru")).map(([k,v])=>`<label class="tg"><input type="checkbox" data-k="${esc(k)}" ${she[k]?"checked":""}><span><b>${esc(v[0])}</b> · ${esc(v[1])}</span></label>`).join("")+`<div class="ar"><button class="seeb" data-a="savetags">Сохранить метки</button></div>`;
 }
+
 function dataHtml(){
-  return`<div class="t">Здесь можно скопировать всё расписание текстом (резервная копия) или вставить новое и нажать «Загрузить».</div><textarea id="ajson" rows="8">${esc(JSON.stringify({bells:{mon:G.mon,vsp:G.vsp,thu:G.thu},ov:OV,sh:SH}))}</textarea><div class="ar"><button class="seeb" data-a="import">Загрузить</button><button data-a="resetall">Сбросить всё</button><button data-a="logout">Выйти</button></div>`;
+  return`<div class="t">Здесь можно скопировать всё расписание текстом (резервная копия) или вставить новое и нажать «Загрузить».</div><textarea id="ajson" rows="8">${esc(JSON.stringify({bells:{mon:G.mon,tue:G.tue,wed:G.wed,thu:G.thu,fri:G.fri},ov:OV,sh:SH}))}</textarea><div class="ar"><button class="seeb" data-a="import">Загрузить</button><button data-a="resetall">Сбросить всё</button><button data-a="logout">Выйти из учетки</button></div>`;
 }
+
 function catalog(){
   const m=new Map();
   L.forEach(l=>m.set(l[2]+"|"+l[3]+"|"+l[5],[l[2],l[3],l[5]]));
   [OV,MY].forEach(o=>Object.values(o).forEach(d=>{for(const p in d)d[p].forEach(x=>m.set(x[0]+"|"+x[1]+"|"+x[2],[x[0],x[1],x[2]]))}));
   return[...m.values()].filter(x=>x[0]).sort((a,b)=>a[0].localeCompare(b[0],"ru")||String(a[1]).localeCompare(String(b[1])));
 }
-let adminOk=!IN_APP; // в приложении кнопка включается, только если приложение разрешило админ-панель
+
+let adminOk=!IN_APP;
 window.__enableAdmin=()=>{adminOk=true;syncTop()};
-function syncTop(){document.getElementById("admbtn").style.display=adminOk?"":"none";document.body.classList.toggle("adm",canAttach())}
+function syncTop(){
+  document.getElementById("admbtn").style.display=(adminOk||tok)?"":"none";
+  document.body.classList.toggle("adm",canAttach());
+}
+
 function drawAdmin(){
   syncTop();
   if(umode){ac.innerHTML=`<div class="t">Правки видны только вам: они хранятся на этом устройстве и накладываются поверх общего расписания.</div>${dayHtml()}<div class="am">${esc(amsg)}</div>`;return}
@@ -504,12 +515,15 @@ function drawAdmin(){
   const tabs=[["day","Пары на день"],["tags","Метки"],["bells","Звонки"],["data","Данные"]].map(([k,n])=>`<button data-a="tab" data-k="${k}" class="${atab===k?"on":""}">${n}</button>`).join("");
   ac.innerHTML=`<div class="t">Вы вошли как <b>${esc(tuser)}</b></div><div class="tabs">${tabs}</div>${atab==="day"?dayHtml():atab==="bells"?bellsHtml():atab==="tags"?tagsHtml():dataHtml()}<div class="am">${esc(amsg)}</div>`;
 }
+
 function collect(){
   if(atab==="day"){const e={};for(let p=1;p<=5;p++)e[p]=[];ac.querySelectorAll(".lr").forEach(r=>{const i=r.querySelectorAll("input");e[r.dataset.p].push([i[0].value.trim(),i[1].value.trim(),i[2].value.trim()])});edit=e}
-  else if(atab==="bells"){const e={mon:[],vsp:[],thu:[]};ac.querySelectorAll(".br").forEach(r=>{const i=r.querySelectorAll("input"),row=[i[0].value.trim(),i[1].value.trim(),i[2].value.trim()];if(i[3].checked)row.push(1);e[r.dataset.g].push(row)});bedit=e}
+  else if(atab==="bells"){const e={mon:[],tue:[],wed:[],thu:[],fri:[]};ac.querySelectorAll(".br").forEach(r=>{const i=r.querySelectorAll("input"),row=[i[0].value.trim(),i[1].value.trim(),i[2].value.trim()];if(i[3].checked)row.push(1);e[r.dataset.g].push(row)});bedit=e}
   else if(atab==="tags"){const n={};ac.querySelectorAll(".tg input").forEach(i=>{if(i.checked)n[i.dataset.k]=1});she=n}
 }
-const bellsCopy=()=>({mon:cp0(G.mon.rows),vsp:cp0(G.vsp.rows),thu:cp0(G.thu.rows)});
+
+const bellsCopy=()=>({mon:cp0(G.mon.rows),tue:cp0(G.tue.rows),wed:cp0(G.wed.rows),thu:cp0(G.thu.rows),fri:cp0(G.fri.rows)});
+
 ac.addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b||!b.dataset.a)return;
   const a=b.dataset.a;amsg="";
@@ -542,12 +556,12 @@ ac.addEventListener("click",async e=>{
   else if(a==="savebells"){
     for(const k in bedit)for(const r of bedit[k]){if(!r[0]&&!r[1])continue;r[1]=r[1].replace(/\s/g,"").replace(/[-—]/,"–");if(!/^\d{1,2}:\d{2}–\d{1,2}:\d{2}$/.test(r[1])){amsg="Неверное время в строке «"+r[0]+"»";break}}
     if(!amsg){for(const k in bedit)G[k].rows=bedit[k].filter(r=>r[0]&&r[1]);amsg=await push()}}
-  else if(a==="resetbells"){["mon","vsp","thu"].forEach(k=>G[k].rows=cp0(G0[k].rows));amsg=await push();bedit=bellsCopy()}
+  else if(a==="resetbells"){["mon","tue","wed","thu","fri"].forEach(k=>G[k].rows=cp0(G0[k].rows));amsg=await push();bedit=bellsCopy()}
   else if(a==="savetags"){SH=cp0(she);amsg=await push()}
   else if(a==="import"){try{
     const j=JSON.parse(document.getElementById("ajson").value);
-    for(const k of["mon","vsp","thu"])if(!j.bells||!j.bells[k]||!Array.isArray(j.bells[k].rows))throw 0;
-    for(const k of["mon","vsp","thu"])G[k].rows=cp0(j.bells[k].rows);
+    for(const k of["mon","tue","wed","thu","fri"])if(!j.bells||!j.bells[k]||!Array.isArray(j.bells[k].rows))throw 0;
+    for(const k of["mon","tue","wed","thu","fri"])G[k].rows=cp0(j.bells[k].rows);
     OV=j.ov&&typeof j.ov==="object"?j.ov:{};SH=j.sh&&typeof j.sh==="object"?j.sh:{};
     amsg=await push()}catch(x){amsg="Неверный формат данных"}}
   else if(a==="notify"){
@@ -562,23 +576,26 @@ ac.addEventListener("click",async e=>{
       if(amsg.startsWith("Сохранено"))amsg="Уведомление отправлено. Друзья получат его в течение пары минут";
     }
   }
-  else if(a==="logout"){tok=null;tuser="";ls("iv_gh")}
+  else if(a==="logout"){tok=null;tuser="";ls("iv_gh");drawAdmin();dlgA.close();syncTop()}
   else if(a==="resetall"){
     if(!b.dataset.c){b.dataset.c=1;b.textContent="Нажмите ещё раз";return}
-    ["mon","vsp","thu"].forEach(k=>G[k].rows=cp0(G0[k].rows));OV={};SH={};amsg=await push()}
+    ["mon","tue","wed","thu","fri"].forEach(k=>G[k].rows=cp0(G0[k].rows));OV={};SH={};amsg=await push()}
   drawAdmin();
 });
+
 ac.addEventListener("change",e=>{
   if(e.target.id==="ad"){aiso=e.target.value;amsg="";loadDay();drawAdmin()}
   else if(e.target.classList.contains("qs")&&e.target.value!==""){collect();edit[e.target.dataset.p].push(cat[+e.target.value].slice());drawAdmin()}
 });
+
 const openAdmin=()=>{umode=false;document.getElementById("ath").textContent="⚙ Админ-панель";amsg="";if(tok){aiso=defaultIso();loadDay();she=cp0(SH)}drawAdmin();dlgA.showModal()};
 document.getElementById("admbtn").onclick=openAdmin;
 document.getElementById("xa").onclick=()=>dlgA.close();
 dlgA.addEventListener("click",e=>{if(e.target===dlgA)dlgA.close()});
 const openMy=()=>{umode=true;document.getElementById("ath").textContent="✏ Мои правки";amsg="";aiso=defaultIso();loadDay();drawAdmin();dlgA.showModal()};
 document.getElementById("mybtn").onclick=openMy;
-{ // меню-гамбургер
+
+{
   const m=document.getElementById("menu"),h=document.getElementById("hamb");
   const close=()=>{m.hidden=true;h.setAttribute("aria-expanded","false")};
   h.onclick=e=>{e.stopPropagation();m.hidden=!m.hidden;h.setAttribute("aria-expanded",String(!m.hidden))};
@@ -588,20 +605,22 @@ document.getElementById("mybtn").onclick=openMy;
 }
 syncTop();
 if(location.hash==="#admin"&&adminOk)openAdmin();
-// ===== Стеклянный акцент текущего дня и вложения =====
-function placeGlass(){} // общий слой дня убран: стеклом выделяются только подпись дня и пара
+
+function placeGlass(){}
 addEventListener("resize",placeGlass);
-function decorate(){ // треугольник в правом верхнем углу пар с вложениями
+function decorate(){
   document.querySelectorAll("#tbl [data-k],#cards [data-k]").forEach(e=>{
     const a=(ATT[e.dataset.k]||{})[e.dataset.p]||[];
     if(a.length)e.insertAdjacentHTML("afterbegin",`<button class="tri" data-k="${e.dataset.k}" data-p="${e.dataset.p}" title="Вложения (${a.length})" aria-label="Вложения"></button>`);
   });
 }
 function canAttach(){return !!tok&&!IN_APP}
+
 const dlgF=document.getElementById("dlgF"),fcEl=document.getElementById("fc");
 let fK="",fP=0,fMsg="";
 const furl=u=>"https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_BRANCH+"/"+u;
 function openFiles(k,p){fK=k;fP=p;fMsg="";drawFiles();dlgF.showModal()}
+
 function drawFiles(){
   const t=Date.parse(fK+"T00:00:00Z"),a=(ATT[fK]||{})[fP]||[];
   document.getElementById("fh").textContent="📎 "+DAYS[dIdx(t)]+", "+fmt(t)+" · "+fP+" пара";
@@ -614,7 +633,8 @@ function drawFiles(){
   if(canAttach())h+=`<div class="ap"><input type="file" id="ff" accept="image/jpeg,image/png,image/webp,application/pdf"><div class="ar"><button class="seeb" data-a="fup">Прикрепить</button></div><div class="t">Только JPG, PNG, WEBP или PDF, до 5 МБ, не больше 5 файлов на пару.</div></div>`;
   fcEl.innerHTML=h+`<div class="am">${esc(fMsg)}</div>`;
 }
-async function sniff(f){ // тип определяем по содержимому файла, а не по имени
+
+async function sniff(f){
   const b=new Uint8Array(await f.slice(0,12).arrayBuffer());
   const at=(i,s)=>[...s].every((c,j)=>b[i+j]===c.charCodeAt(0));
   if(b[0]===0xFF&&b[1]===0xD8&&b[2]===0xFF)return"jpg";
@@ -623,11 +643,9 @@ async function sniff(f){ // тип определяем по содержимо�
   if(at(0,"%PDF-"))return"pdf";
   return null;
 }
-// --- защита загрузки: фото перекодируем, PDF проверяем ---
-const ALLOW_PDF=true; // false — разрешить только фото
+
+const ALLOW_PDF=true;
 async function cleanImage(f,ext){
-  // файл должен реально открыться как изображение; затем рисуем его заново на canvas и сохраняем —
-  // так пропадают метаданные (в т.ч. геолокация) и любые «приклеенные» к файлу данные
   let bmp;
   try{bmp=await createImageBitmap(f,{imageOrientation:"from-image"})}
   catch(e){try{bmp=await createImageBitmap(f)}catch(e2){return null}}
@@ -644,10 +662,12 @@ async function cleanImage(f,ext){
   const out=blob.type==="image/jpeg"?"jpg":blob.type==="image/webp"?"webp":blob.type==="image/png"?"png":null;
   return out?{buf:await blob.arrayBuffer(),ext:out}:null;
 }
+
 const PDF_BAD=/\/(JavaScript|JS|Launch|OpenAction|AA|AcroForm|EmbeddedFiles?|FileAttachment|RichMedia|XFA|SubmitForm|ImportData|GoToR|GoToE|URI|Encrypt|Movie|Sound|3D|Rendition|Screen)(?![A-Za-z0-9])/;
 const PDF_MSG="В PDF есть скрипты, ссылки, формы или вложенные файлы — такой файл прикрепить нельзя";
 const latin=u=>{let s="";for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return s};
-const unhex=s=>s.replace(/#([0-9A-Fa-f]{2})/g,(m,h)=>String.fromCharCode(parseInt(h,16))); // имена вида /J#61vaScript
+const unhex=s=>s.replace(/#([0-9A-Fa-f]{2})/g,(m,h)=>String.fromCharCode(parseInt(h,16)));
+
 async function inflate(u8){
   try{
     const ds=new DecompressionStream("deflate"),w=ds.writable.getWriter();
@@ -658,11 +678,11 @@ async function inflate(u8){
     return latin(all);
   }catch(e){return null}
 }
+
 async function pdfCheck(buf){
   const u8=new Uint8Array(buf),t=latin(u8);
   if(!t.startsWith("%PDF-1.")&&!t.startsWith("%PDF-2."))return"Это не PDF-файл";
   if(!t.includes("%%EOF"))return"PDF повреждён";
-  // структура файла без тел потоков (иначе в сжатых данных случайно встретятся короткие имена вроде /JS)
   let i=0,struct="",last=0,objs=0;
   for(;;){
     const s=t.indexOf("stream",i);if(s<0)break;
@@ -671,9 +691,8 @@ async function pdfCheck(buf){
     const e=t.indexOf("endstream",a);if(e<0)return"PDF повреждён";
     struct+=t.slice(last,a);last=e;
     const dict=t.slice(Math.max(0,t.lastIndexOf("obj",s)),s);
-    if(dict.includes("/ObjStm")){ // здесь прячутся обычные объекты — распаковываем и проверяем
+    if(dict.includes("/ObjStm")){
       if(++objs>200)return"Слишком сложный PDF";
-      // граница данных: по /Length, а если не вышло — с отбрасыванием переводов строки перед endstream
       const m=/\/Length\s+(\d+)(?!\s+\d+\s+R)/.exec(dict),ends=[];
       if(m&&a+ +m[1]<=e)ends.push(a+ +m[1]);
       ends.push(e,e-1,e-2);
@@ -687,6 +706,7 @@ async function pdfCheck(buf){
   struct+=t.slice(last);
   return PDF_BAD.test(unhex(struct))?PDF_MSG:null;
 }
+
 async function prepareUpload(f){
   const ext=await sniff(f);
   if(!ext)return{err:"Допустимы только JPG, PNG, WEBP и PDF"};
@@ -703,7 +723,9 @@ async function prepareUpload(f){
   if(buf.byteLength>5*1024*1024)return{err:"После обработки файл больше 5 МБ"};
   return{buf,ext:out};
 }
+
 function b64buf(buf){const u=new Uint8Array(buf);let s="";for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
+
 fcEl.addEventListener("click",async e=>{
   const b=e.target.closest("button");if(!b||!b.dataset.a||!canAttach())return;
   const list=((ATT[fK]=ATT[fK]||{})[fP]=ATT[fK][fP]||[]);
@@ -733,13 +755,14 @@ fcEl.addEventListener("click",async e=>{
     list.splice(i,1);
     if(!list.length){delete ATT[fK][fP];if(!Object.keys(ATT[fK]).length)delete ATT[fK]}
     fMsg=await push();render();
-    try{ // сам файл тоже удаляем из репозитория (если получится)
+    try{
       const pu="https://api.github.com/repos/"+GH_REPO+"/contents/"+x.u,g=await fetch(pu+"?ref="+GH_BRANCH,{headers:ghH(tok)});
       if(g.ok)await fetch(pu,{method:"DELETE",headers:{...ghH(tok),"Content-Type":"application/json"},body:JSON.stringify({message:"Удалено вложение ("+tuser+")",sha:(await g.json()).sha,branch:GH_BRANCH})});
     }catch(x2){}
   }
   drawFiles();
 });
+
 document.addEventListener("click",e=>{
   const t=e.target.closest(".tri");
   if(t){openFiles(t.dataset.k,+t.dataset.p);return}
@@ -747,14 +770,15 @@ document.addEventListener("click",e=>{
 });
 document.getElementById("xf").onclick=()=>dlgF.close();
 dlgF.addEventListener("click",e=>{if(e.target===dlgF)dlgF.close()});
-{ // стрелка «наверх»
+
+{
   const b=document.getElementById("toTop");let t=0;
   const upd=()=>{t=0;b.classList.toggle("show",scrollY>240)};
   addEventListener("scroll",()=>{if(!t)t=requestAnimationFrame(upd)},{passive:true});
   b.onclick=()=>scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
   upd();
 }
-// --- уведомления об изменении расписания ---
+
 let noticeShown="";
 function dismissNotice(id){ls("iv_seen",id);noticeShown="";document.getElementById("notice").hidden=true}
 function checkNotice(){
@@ -778,27 +802,26 @@ document.getElementById("notice").addEventListener("click",e=>{
     document.getElementById("tbl").scrollIntoView({behavior:"smooth",block:"start"});
   }else dismissNotice(id);
 });
-{ // включение уведомлений браузера (работают, пока сайт открыт во вкладке)
+
+{
   const b=document.getElementById("notifbtn");
   if(!IN_APP&&"Notification" in window){
     const upd=()=>{b.hidden=false;b.textContent=Notification.permission==="granted"?"🔔 Уведомления включены":Notification.permission==="denied"?"🔕 Запрещены в браузере":"🔔 Уведомления в браузере"};
     upd();b.onclick=e=>{if(Notification.permission==="default"){e.stopPropagation();Notification.requestPermission().then(upd)}};
   }
 }
+
 const CHANGES=[
- {d:"",t:"Уведомления об изменениях",i:["Админ может отправить всем уведомление об изменении расписания на день отдельной кнопкой («Пары на день» → «Отправить уведомление»)","На сайте уведомление появляется сверху с кнопкой «Показать день»; по желанию можно включить уведомления браузера (в меню)","В приложении приходит системное уведомление (проверка в фоне раз в 30 минут)","Праздничный день, кнопка «Увидеть расписание на этот день» и метка «нужна сменка» оформлены в стиле Liquid Glass"]},
- {d:"29.10.2026",t:"Liquid Glass и вложения",i:["Номер учебной недели — прозрачная цифра с обводкой и свечением","На компьютере стеклом выделяются только подпись текущего дня и текущая пара, строго по форме ячеек таблицы","Ближайший звонок в расписании звонков выделяется стеклянным акцентом, а не заливкой","Админы могут прикреплять к паре фото и PDF: нажать на пару на сайте (JPG, PNG, WEBP, PDF, до 5 МБ)","У пар с вложениями в правом верхнем углу появился треугольник — по нажатию открываются вложения","В мобильной версии при прокрутке вниз появляется стрелка «наверх»","Безопасная загрузка вложений: фото перекодируются (удаляются метаданные и скрытые данные), PDF проверяются на скрипты, ссылки, формы и вложенные файлы"]},
- {d:"27.10.2026",t:"Меню и админ-панель",i:["Слева меню-гамбургер: звонки, «Мои правки» и «Что нового»","Админ-панель вынесена отдельной кнопкой справа и доступна на телефоне, в том числе в приложении","Исправлены «откаты» правок: принимаются только более новые данные, старые копии из кэша GitHub игнорируются","Данные расписания запрашиваются без кэша, правки доходят быстрее"]},
- {d:"",t:"Быстрые правки и новый вид",i:["Быстрая правка пар: выбор предмета из списка — преподаватель, кабинет и метка «нужна сменка» подставляются сами","«Мои правки» — личные изменения расписания, видны только на вашем устройстве","Стиль Liquid Glass для окон и кнопок","Текущая пара: заливка в звонках и на телефоне, рамка на компьютере","Кнопка «Что нового»","Отмена пар: если админ убирает все пары на день, он показывается как выходной с причиной «отмена пар»"]},
- {d:"",t:"Общее расписание и админ-панель",i:["Правки админов видят все: сайт и приложение","Метка «нужна сменка» для предмета и преподавателя","Защита от XSS"]},
- {d:"",t:"Приложение и оффлайн",i:["Последняя сохранённая копия расписания работает без интернета","Усиленная безопасность приложения","Окно обновления один раз для каждой версии"]},
- {d:"",t:"Расписание, звонки, праздники",i:["Расчёт учебной недели с 1 сентября","Расписание звонков и подсветка текущей пары","Праздники по производственному календарю 2026","Версия для телефонов"]}
+ {d:"",t:"Раздельные звонки и админка",i:["Звонки для вторника, среды и пятницы теперь разделены и настраиваются отдельно","Админ-панель скрыта для обычных пользователей и появляется только после входа или по ссылке #admin","Добавлена кнопка выхода из админ-учетки во вкладке Данные","Улучшена синхронизация с Android-приложением"]}
 ];
 document.getElementById("newsbtn").onclick=()=>{
-  document.getElementById("nc").innerHTML=CHANGES.map((c,k)=>(k===1?'<div class="bh">Ранее</div>':"")+`<div class="ap${k?"":" lat"}"><b>${k?"":"Последнее обновление · "}${esc(c.t)}</b>${c.d?` <span class="t">${esc(c.d)}</span>`:""}<ul>${c.i.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
+  document.getElementById("nc").innerHTML=CHANGES.map((c,k)=>`<div class="ap lat"><b>${esc(c.t)}</b><ul>${c.i.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("");
   document.getElementById("dlgN").showModal();
 };
 document.getElementById("xn").onclick=()=>document.getElementById("dlgN").close();
 document.getElementById("dlgN").addEventListener("click",e=>{if(e.target.id==="dlgN")e.target.close()});
+
 render();
 </script>
+</body>
+</html>
