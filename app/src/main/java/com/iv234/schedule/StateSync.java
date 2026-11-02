@@ -33,6 +33,7 @@ final class StateSync {
     static String fetchAndStore(Context ctx) {
         HttpURLConnection c = null;
         try {
+            // Добавлен динамический параметр времени для обхода кэша CDN GitHub
             URL u = new URL(DATA_URL + "?t=" + System.currentTimeMillis());
             if (!"https".equals(u.getProtocol()) || !DATA_HOST.equals(u.getHost())) return null;
             c = (HttpURLConnection) u.openConnection();
@@ -40,8 +41,15 @@ final class StateSync {
             c.setConnectTimeout(6000);
             c.setReadTimeout(6000);
             c.setUseCaches(false);
+            
+            // Дополнительные заголовки для предотвращения кэширования ответов
+            c.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
+            c.setRequestProperty("Pragma", "no-cache");
+            c.setRequestProperty("Expires", "0");
+            
             c.setRequestProperty("User-Agent", "IV234");
             c.setRequestProperty("Accept", "application/json");
+            
             if (c.getResponseCode() != 200) return null;
             String ct = c.getContentType();
             if (ct == null || !(ct.startsWith("application/json") || ct.startsWith("text/plain"))) return null;
