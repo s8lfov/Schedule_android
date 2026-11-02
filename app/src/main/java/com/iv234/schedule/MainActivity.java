@@ -59,15 +59,12 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Внимание: если вы создали layout в activity_main.xml, раскомментируйте setContentView(R.layout.activity_main);
-        // Если вы создавали элементы программно — код ниже оборачивает WebView программно:
-        
-        web = new WebView(this);
-        swipeRefresh = new SwipeRefreshLayout(this);
-        swipeRefresh.addView(web);
-        swipeRefresh.setColorSchemeColors(0xFF6D28D9); // Фиолетовый цвет индикатора загрузки
-
+        setContentView(R.layout.activity_main);
         getWindow().setStatusBarColor(0xFF6D28D9);
+
+        web = findViewById(R.id.webview);
+        swipeRefresh = findViewById(R.id.swipeRefresh);
+        swipeRefresh.setColorSchemeColors(0xFF6D28D9); // Фиолетовый цвет индикатора загрузки
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -97,8 +94,15 @@ public class MainActivity extends Activity {
             public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest r) {
                 String u = r.getUrl().toString();
                 if (u.startsWith("file:///android_asset/") || u.startsWith("data:")) return null;
-                if (ADMIN_IN_APP && "https".equals(r.getUrl().getScheme())
-                        && "api.github.com".equals(r.getUrl().getHost())) return null;
+                
+                // ИСПРАВЛЕНИЕ: Разрешаем запросы к GitHub API (для админки) и к raw-файлу расписания
+                if ("https".equals(r.getUrl().getScheme())) {
+                    String host = r.getUrl().getHost();
+                    if ("api.github.com".equals(host) || "raw.githubusercontent.com".equals(host)) {
+                        return null; 
+                    }
+                }
+                
                 return new WebResourceResponse("text/plain", "utf-8",
                         new ByteArrayInputStream(new byte[0]));
             }
@@ -121,7 +125,6 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> swipeRefresh.setRefreshing(false));
         }));
 
-        setContentView(swipeRefresh);
         shownDay = today();
         web.loadUrl(ASSET_URL);
         if (CHECK_UPDATES) checkForUpdate();
@@ -134,7 +137,6 @@ public class MainActivity extends Activity {
         web.evaluateJavascript("window.__setState&&window.__setState(" + lit + ")", null);
     }
 
-    /** Скачивает свежий schedule.json. Передаваемый callback вызывается по завершении (для скрытия анимации свайпа). */
     private void fetchState(Runnable onComplete) {
         new Thread(() -> {
             Context app = getApplicationContext();
