@@ -421,7 +421,7 @@ const ADMINS=["s8lfov","deft-airspace"];
 const DATA_URL="https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_BRANCH+"/"+GH_FILE;
 const ghH=t=>({"Authorization":"Bearer "+t,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"});
 const IN_APP=location.protocol==="file:";
-let OV={},SH={},ATT={},NOTICE=null,rev=0,stAt="",tok=null,tuser="";
+let OV={},SH={},ATT={},DB={},NOTICE=null,rev=0,stAt="",tok=null,tuser="";
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const lg=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const ls=(k,v)=>{try{v===undefined?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
@@ -443,14 +443,29 @@ function cleanNotice(n){
   if(!ok(n.id,24)||!/^[A-Za-z0-9_-]{4,24}$/.test(n.id)||!/^\d{4}-\d{2}-\d{2}$/.test(n.d||"")||!ok(n.t,140))return null;
   return{id:n.id,d:n.d,t:n.t.replace(/[<>\x00-\x1f]/g,""),by:ok(n.by,40)?n.by.replace(/[^A-Za-z0-9_-]/g,""):"",at:ok(n.at,40)?n.at:""};
 }
+function cleanDB(a){
+  const o={};if(!a||typeof a!=="object")return o;
+  for(const k in a){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(k)||!Array.isArray(a[k]))continue;
+    const rows=[];
+    for(const r of a[k].slice(0,20)){
+      if(!Array.isArray(r)||typeof r[0]!=="string"||typeof r[1]!=="string")continue;
+      const row=[r[0].slice(0,60),r[1].slice(0,60),typeof r[2]==="string"?r[2].slice(0,60):""];
+      if(r[3])row.push(1);
+      rows.push(row);
+    }
+    if(rows.length)o[k]=rows;
+  }
+  return o;
+}
 function applyState(s){
   if(!s||typeof s!=="object")return false;
   for(const k of["mon","tue","wed","thu","fri"]){const g=s.bells&&s.bells[k];G[k].rows=g&&Array.isArray(g.rows)?cp0(g.rows):cp0(G0[k].rows)}
-  OV=s.ov&&typeof s.ov==="object"?s.ov:{};SH=s.sh&&typeof s.sh==="object"?s.sh:{};ATT=cleanAtt(s.att);NOTICE=cleanNotice(s.notice);rev=+s.rev||0;stAt=s.at||"";return true;
+  OV=s.ov&&typeof s.ov==="object"?s.ov:{};SH=s.sh&&typeof s.sh==="object"?s.sh:{};ATT=cleanAtt(s.att);DB=cleanDB(s.db);NOTICE=cleanNotice(s.notice);rev=+s.rev||0;stAt=s.at||"";return true;
 }
 applyState(lg("iv_state"));
 let MY=lg("iv_my")||{};
-let DB={},MYB=lg("iv_myb")||{};
+let MYB=lg("iv_myb")||{};
 function bellsFor(t,d){const k=iso(t);return MYB[k]||DB[k]||G[gk(d)].rows}
 {const t=lg("iv_gh");if(t&&t.token){tok=t.token;tuser=t.user}}
 const newer=s=>(+s.rev||0)>rev;
@@ -617,7 +632,7 @@ ac.addEventListener("click",async e=>{
   else if(a==="del")edit[b.dataset.p].splice(+b.dataset.i,1);
   else if(a==="saveday"){const o={};for(let p=1;p<=5;p++)o[p]=edit[p].filter(x=>x[0]);if(umode){MY[aiso]=o;ls("iv_my",MY);amsg="Сохранено на этом устройстве";render()}else{OV[aiso]=o;amsg=await push()}}
   else if(a==="resetday"){if(umode){delete MY[aiso];ls("iv_my",MY);amsg="Возвращено по умолчанию";render()}else{delete OV[aiso];amsg=await push()}loadDay()}
-  else if(a==="daybells"){dlgA.close();openDayBells(dIdx(Date.parse(aiso+"T00:00:00Z")),true);return}
+  else if(a==="daybells"){dlgA.close();openDayBells(dIdx(Date.parse(aiso+"T00:00:00Z")),umode,aiso);return}
   else if(a==="badd")bedit[b.dataset.g].push(["","",""]);
   else if(a==="bdel")bedit[b.dataset.g].splice(+b.dataset.i,1);
   else if(a==="savebells"){
@@ -629,7 +644,7 @@ ac.addEventListener("click",async e=>{
     const j=JSON.parse(document.getElementById("ajson").value);
     for(const k of["mon","tue","wed","thu","fri"])if(!j.bells||!j.bells[k]||!Array.isArray(j.bells[k].rows))throw 0;
     for(const k of["mon","tue","wed","thu","fri"])G[k].rows=cp0(j.bells[k].rows);
-    OV=j.ov&&typeof j.ov==="object"?j.ov:{};SH=j.sh&&typeof j.sh==="object"?j.sh:{};
+    OV=j.ov&&typeof j.ov==="object"?j.ov:{};SH=j.sh&&typeof j.sh==="object"?j.sh:{};DB=cleanDB(j.db);
     amsg=await push()}catch(x){amsg="Неверный формат данных"}}
   else if(a==="notify"){
     const t=Date.parse(aiso+"T00:00:00Z");
@@ -646,7 +661,7 @@ ac.addEventListener("click",async e=>{
   else if(a==="logout"){tok=null;tuser="";ls("iv_gh");drawAdmin();dlgA.close();syncTop()}
   else if(a==="resetall"){
     if(!b.dataset.c){b.dataset.c=1;b.textContent="Нажмите ещё раз";return}
-    ["mon","tue","wed","thu","fri"].forEach(k=>G[k].rows=cp0(G0[k].rows));OV={};SH={};amsg=await push()}
+    ["mon","tue","wed","thu","fri"].forEach(k=>G[k].rows=cp0(G0[k].rows));OV={};SH={};DB={};amsg=await push()}
   drawAdmin();
 });
 
@@ -898,8 +913,8 @@ document.getElementById("dlgN").addEventListener("click",e=>{if(e.target.id==="d
 
 const dlgB=document.getElementById("dlgB");
 let bDate="",bRows=[],bUserMode=false,bmsg="";
-function openDayBells(d,userMode){
-  const t=mon1+(week-1)*7*DAY+d*DAY;
+function openDayBells(d,userMode,isoDate){
+  const t=isoDate?Date.parse(isoDate+"T00:00:00Z"):mon1+(week-1)*7*DAY+d*DAY;
   if(isNaN(t)||dIdx(t)>4)return;
   bDate=iso(t);bUserMode=!!userMode;bmsg="";
   bRows=cp0(bellsFor(t,d));

@@ -109,7 +109,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView v, String url) {
-                String cached = getSharedPreferences("s", MODE_PRIVATE).getString("state", null);
+                String cached = StateSync.cached(getApplicationContext());
                 if (cached != null) pushState(cached);
                 if (ADMIN_IN_APP) web.evaluateJavascript("window.__enableAdmin&&window.__enableAdmin()", null);
             }
@@ -126,6 +126,7 @@ public class MainActivity extends Activity {
         }));
 
         shownDay = today();
+        StateSync.seedFromAssets(getApplicationContext()); // расписание на момент сборки APK (если новее сохранённого)
         web.loadUrl(ASSET_URL);
         if (CHECK_UPDATES) checkForUpdate();
         setupNotices();
@@ -142,8 +143,7 @@ public class MainActivity extends Activity {
             Context app = getApplicationContext();
             String fresh = StateSync.fetchAndStore(app);
             if (fresh != null) StateSync.notifyIfNew(app, fresh, false);
-            final String show = fresh != null ? fresh
-                    : app.getSharedPreferences("s", MODE_PRIVATE).getString("state", null);
+            final String show = fresh != null ? fresh : StateSync.cached(app);
             if (show != null) runOnUiThread(() -> pushState(show));
             if (onComplete != null) onComplete.run();
         }).start();

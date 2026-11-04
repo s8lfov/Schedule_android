@@ -44,6 +44,16 @@ android {
     }
 }
 
+// Единый источник веб-версии — index.html в корне репозитория (его же отдаёт сайт).
+// Перед каждой сборкой копируем его в assets, чтобы APK не отставал от сайта.
+tasks.register('syncWebIndex', Copy) {
+    def src = rootProject.file('index.html')
+    onlyIf { src.exists() }
+    from src
+    into file('src/main/assets')
+}
+tasks.matching { it.name == 'preBuild' }.configureEach { dependsOn 'syncWebIndex' }
+
 dependencies {
     // Библиотека для реализации жеста «тяни вниз для обновления» (SwipeRefreshLayout)
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"

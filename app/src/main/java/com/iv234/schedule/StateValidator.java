@@ -23,24 +23,36 @@ final class StateValidator {
             if (!at.isEmpty()) out.put("at", str(at, 40));
             if (!in.has("bells")) return out.toString(); // пустое состояние: действует базовое расписание
 
+            // звонки: пн, вт, ср, чт, пт. Старый формат (общая группа "vsp" для вт/ср/пт) тоже понимаем.
+            // Отсутствующая группа — не ошибка: приложение возьмёт стандартные звонки.
             JSONObject bells = in.getJSONObject("bells");
             JSONObject ob = new JSONObject();
-            for (String k : new String[]{"mon", "vsp", "thu"}) {
-                JSONObject g = bells.getJSONObject(k);
-                JSONArray rows = g.getJSONArray("rows");
-                if (rows.length() > 20) return null;
-                JSONArray orows = new JSONArray();
-                for (int i = 0; i < rows.length(); i++) {
-                    JSONArray r = rows.getJSONArray(i);
-                    if (r.length() < 3 || r.length() > 4) return null;
-                    JSONArray o = new JSONArray();
-                    for (int j = 0; j < 3; j++) o.put(str(r.get(j), 60));
-                    if (r.length() == 4 && r.optInt(3, 0) != 0) o.put(1);
-                    orows.put(o);
+            for (String k : new String[]{"mon", "tue", "wed", "thu", "fri"}) {
+                JSONObject g = bells.optJSONObject(k);
+                if (g == null && (k.equals("tue") || k.equals("wed") || k.equals("fri"))) {
+                    g = bells.optJSONObject("vsp");
                 }
+                if (g == null) continue;
+                JSONArray orows = bellRows(g.getJSONArray("rows"));
+                if (orows == null) return null;
                 ob.put(k, new JSONObject().put("name", str(g.opt("name") == null ? "" : g.get("name"), 60)).put("rows", orows));
             }
             out.put("bells", ob);
+
+            // звонки на отдельные дни: { "2026-11-05": [[№, время, перемена, (1 — большая)], ...] }
+            JSONObject odb = new JSONObject();
+            JSONObject db = in.optJSONObject("db");
+            if (db != null) {
+                if (db.length() > 400) return null;
+                for (Iterator<String> it = db.keys(); it.hasNext(); ) {
+                    String d = it.next();
+                    if (!d.matches("\\d{4}-\\d{2}-\\d{2}")) return null;
+                    JSONArray orows = bellRows(db.getJSONArray(d));
+                    if (orows == null) return null;
+                    if (orows.length() > 0) odb.put(d, orows);
+                }
+            }
+            out.put("db", odb);
 
             JSONObject oov = new JSONObject();
             JSONObject ov = in.optJSONObject("ov");
@@ -130,6 +142,21 @@ final class StateValidator {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /** Строки звонков: [название/№, время, перемена, (1 — большая перемена)]. null — данные некорректны. */
+    private static JSONArray bellRows(JSONArray rows) throws Exception {
+        if (rows.length() > 20) return null;
+        JSONArray orows = new JSONArray();
+        for (int i = 0; i < rows.length(); i++) {
+            JSONArray r = rows.getJSONArray(i);
+            if (r.length() < 3 || r.length() > 4) return null;
+            JSONArray o = new JSONArray();
+            for (int j = 0; j < 3; j++) o.put(str(r.get(j), 60));
+            if (r.length() == 4 && r.optInt(3, 0) != 0) o.put(1);
+            orows.put(o);
+        }
+        return orows;
     }
 
     /** Только строка, не длиннее max, без < > и управляющих символов. */

@@ -79,6 +79,43 @@ final class StateSync {
         }
     }
 
+    /** Сохранённая копия расписания; если она записана старой версией приложения — приводится к новой схеме. */
+    static String cached(Context ctx) {
+        String c = ctx.getSharedPreferences("s", Context.MODE_PRIVATE).getString("state", null);
+        if (c == null) return null;
+        String clean = StateValidator.sanitize(c);
+        return clean != null ? clean : c;
+    }
+
+    /**
+     * Снимок schedule.json, зашитый в APK при сборке (assets/schedule.json, кладётся сборкой на GitHub).
+     * Нужен, чтобы только что установленное приложение сразу показывало актуальное расписание,
+     * в том числе без интернета. Применяется, только если новее сохранённой копии; всё равно
+     * проходит ту же проверку, что и данные из сети.
+     */
+    static void seedFromAssets(Context ctx) {
+        try (InputStream in = ctx.getAssets().open("schedule.json")) {
+            ByteArrayOutputStream bo = new ByteArrayOutputStream();
+            byte[] buf = new byte[4096];
+            int n, total = 0;
+            while ((n = in.read(buf)) > 0) {
+                total += n;
+                if (total > MAX_BYTES) return;
+                bo.write(buf, 0, n);
+            }
+            String clean = StateValidator.sanitize(bo.toString("UTF-8"));
+            if (clean == null) return;
+            SharedPreferences sp = ctx.getSharedPreferences("s", Context.MODE_PRIVATE);
+            String old = sp.getString("state", null);
+            if (old != null && !isNewerState(clean, old)) return;
+            sp.edit().putString("state", clean).apply();
+            // уведомление из снимка считается уже виденным (не показываем его как новое)
+            notifyIfNew(ctx, clean, false);
+        } catch (Exception ignored) {
+            // снимка в APK нет или он повреждён — расписание придёт из сети
+        }
+    }
+
     /** Новее только по номеру версии: время на разных устройствах может расходиться. */
     static boolean isNewerState(String a, String b) {
         try {

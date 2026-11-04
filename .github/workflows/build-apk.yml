@@ -36,6 +36,14 @@ jobs:
           else
             echo "Using fallback key"
           fi
+      - name: Bundle current schedule snapshot into the APK
+        run: |
+          if [ -f schedule.json ]; then
+            cp schedule.json app/src/main/assets/schedule.json
+            echo "Bundled schedule.json (rev: $(grep -o '"rev": *[0-9]*' schedule.json | head -n 1))"
+          else
+            echo "No schedule.json in the repository - the app will download it on first launch"
+          fi
       - name: Build
         run: |
           VER="${GITHUB_REF_NAME#v}"
