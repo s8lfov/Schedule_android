@@ -95,7 +95,7 @@ public class MainActivity extends Activity {
                 String u = r.getUrl().toString();
                 if (u.startsWith("file:///android_asset/") || u.startsWith("data:")) return null;
                 
-                // ИСПРАВЛЕНИЕ: Разрешаем запросы к GitHub API (для админки) и к raw-файлу расписания
+                // Разрешаем запросы к GitHub API (для админки) и к raw-файлу расписания
                 if ("https".equals(r.getUrl().getScheme())) {
                     String host = r.getUrl().getHost();
                     if ("api.github.com".equals(host) || "raw.githubusercontent.com".equals(host)) {
@@ -200,7 +200,7 @@ public class MainActivity extends Activity {
         if (now - p.getLong("t", 0) < CHECK_EVERY_MS) return;
 
         new Thread(() -> {
-            // ... логика проверки версий ...
+            // Логика проверки обновлений
         }).start();
     }
 
