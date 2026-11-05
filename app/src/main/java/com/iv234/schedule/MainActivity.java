@@ -84,7 +84,8 @@ public class MainActivity extends Activity {
                 Uri u = r.getUrl();
                 if ("https".equals(u.getScheme()) && "raw.githubusercontent.com".equals(u.getHost())
                         && u.getPath() != null
-                        && u.getPath().startsWith("/s8lfov/Schedule_android/main/files/")) {
+                        && (u.getPath().startsWith("/s8lfov/Schedule_android/data/files/")
+                            || u.getPath().startsWith("/s8lfov/Schedule_android/main/files/"))) {
                     try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception ignored) { }
                 }
                 return true;

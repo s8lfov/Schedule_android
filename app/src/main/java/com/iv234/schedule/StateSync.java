@@ -22,7 +22,11 @@ import java.net.URL;
  */
 final class StateSync {
     static final String DATA_HOST = "raw.githubusercontent.com";
+    // Расписание лежит в отдельной ветке data, чтобы выпуск новых версий кода (ветка main)
+    // не мог его стереть. Ветка main — запасной вариант для старых данных.
     static final String DATA_URL =
+            "https://raw.githubusercontent.com/s8lfov/Schedule_android/data/schedule.json";
+    static final String LEGACY_URL =
             "https://raw.githubusercontent.com/s8lfov/Schedule_android/main/schedule.json";
     private static final int MAX_BYTES = 200 * 1024;
     private static final String CHANNEL = "notices";
@@ -31,28 +35,35 @@ final class StateSync {
 
     /** Скачивает и проверяет расписание. Возвращает проверенный JSON, если он новее сохранённого, иначе null. */
     static String fetchAndStore(Context ctx) {
+        String raw = download(DATA_URL);
+        if (raw == null) raw = download(LEGACY_URL); // в ветке data файла ещё нет
+        if (raw == null) return null;                // нет сети / файла нигде нет — остаётся сохранённая копия
+        String clean = StateValidator.sanitize(raw);
+        if (clean == null) return null;              // не прошло проверку — остаётся старая копия
+        SharedPreferences sp = ctx.getSharedPreferences("s", Context.MODE_PRIVATE);
+        String old = sp.getString("state", null);
+        if (old != null && !isNewerState(clean, old)) return null; // устаревшая копия из кэша
+        sp.edit().putString("state", clean).apply();
+        return clean;
+    }
+
+    /** Загрузка текста по адресу (только raw.githubusercontent.com по HTTPS). null — не удалось. */
+    private static String download(String url) {
         HttpURLConnection c = null;
         try {
             // Динамический параметр времени для обхода кэша CDN GitHub
-            URL u = new URL(DATA_URL + "?t=" + System.currentTimeMillis());
+            URL u = new URL(url + "?t=" + System.currentTimeMillis());
             if (!"https".equals(u.getProtocol()) || !DATA_HOST.equals(u.getHost())) return null;
             c = (HttpURLConnection) u.openConnection();
-            
-            // ИСПРАВЛЕНИЕ: разрешаем перенаправления (GitHub отдаёт файлы через CDN с кодом 302/301)
-            c.setInstanceFollowRedirects(true);   
-            
+            c.setInstanceFollowRedirects(true);
             c.setConnectTimeout(6000);
             c.setReadTimeout(6000);
             c.setUseCaches(false);
-            
-            // Заголовки для предотвращения кэширования ответов
             c.setRequestProperty("Cache-Control", "no-cache, no-store, must-revalidate");
             c.setRequestProperty("Pragma", "no-cache");
             c.setRequestProperty("Expires", "0");
-            
             c.setRequestProperty("User-Agent", "IV234");
             c.setRequestProperty("Accept", "application/json");
-            
             if (c.getResponseCode() != 200) return null;
             String ct = c.getContentType();
             if (ct == null || !(ct.startsWith("application/json") || ct.startsWith("text/plain"))) return null;
@@ -65,15 +76,9 @@ final class StateSync {
                 if (total > MAX_BYTES) return null;   // слишком большой ответ — отбрасываем
                 bo.write(buf, 0, n);
             }
-            String clean = StateValidator.sanitize(bo.toString("UTF-8"));
-            if (clean == null) return null;           // не прошло проверку — остаётся старая копия
-            SharedPreferences sp = ctx.getSharedPreferences("s", Context.MODE_PRIVATE);
-            String old = sp.getString("state", null);
-            if (old != null && !isNewerState(clean, old)) return null; // устаревшая копия из кэша
-            sp.edit().putString("state", clean).apply();
-            return clean;
+            return bo.toString("UTF-8");
         } catch (Exception e) {
-            return null;                               // нет интернета и т.п. — работаем с сохранённой копией
+            return null;
         } finally {
             if (c != null) c.disconnect();
         }
@@ -116,10 +121,18 @@ final class StateSync {
         }
     }
 
-    /** Новее только по номеру версии: время на разных устройствах может расходиться. */
+    /**
+     * Новее по номеру версии (rev): устаревшие копии из кэша GitHub не должны откатывать расписание.
+     * Исключение: если файл schedule.json на GitHub был удалён и создан заново, rev начинается с
+     * малых значений. Тогда состояние считается новее, если оно записано позже (поле "at", UTC).
+     * Без этого приложение навсегда «застревало» бы на старой копии с большим rev.
+     */
     static boolean isNewerState(String a, String b) {
         try {
-            return new JSONObject(a).optInt("rev", 0) > new JSONObject(b).optInt("rev", 0);
+            JSONObject x = new JSONObject(a), y = new JSONObject(b);
+            if (x.optInt("rev", 0) > y.optInt("rev", 0)) return true;
+            String ax = x.optString("at", ""), ay = y.optString("at", "");
+            return !ay.isEmpty() && ax.compareTo(ay) > 0;
         } catch (Exception e) {
             return true;
         }

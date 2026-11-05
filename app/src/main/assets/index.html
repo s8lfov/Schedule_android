@@ -34,14 +34,18 @@
 :root[data-theme="light"] dialog .am{color:#f89a6f}
 :root[data-theme="light"] .seeb{color:#f4efe9}
 :root[data-theme="light"] .cp.now{color:#241d18}
-:root[data-theme="light"] .cp.now .ct,:root[data-theme="light"] .cp.now .ct b,:root[data-theme="light"] .cp.now .t,:root[data-theme="light"] .cp.now .r,:root[data-theme="light"] .cp.now::before,:root[data-theme="light"] .cp.now .les b,:root[data-theme="light"] .cp.now .shoe{color:#241d18}
+:root[data-theme="light"] .cp.now::before{color: var(--accent);}
+:root[data-theme="light"] .cp.now .ct,:root[data-theme="light"] .cp.now .ct b{color: var(--accent-ink)}
+:root[data-theme="light"] .cp.now .les b{color: #fff}
+:root[data-theme="light"] .cp.now .r{color: #f89a6f;}
+:root[data-theme="light"] .cp.now .t,:root[data-theme="light"] .cp.now .shoe{color:#cfc7bf;}
 :root[data-theme="light"] td.hol{background:linear-gradient(135deg,var(--gl1),var(--gl2) 46%,var(--glt));color:#241d18;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),inset 0 1px 1px rgba(255,255,255,.7),inset 0 -14px 26px var(--glt)}
 :root[data-theme="light"] td.hol .hb,:root[data-theme="light"] td.hol .hb b,:root[data-theme="light"] td.hol .hb .t,:root[data-theme="light"] td.hol .dh2,:root[data-theme="light"] td.hol .dh2 b,:root[data-theme="light"] td.hol .dh2 span{color:#fff}
 :root[data-theme="light"] td.hol .hb .hi{filter:none}
 :root[data-theme="light"] body{background: radial-gradient(900px 500px at 8% -8%, rgba(244, 125, 82, .38), transparent), radial-gradient(800px 520px at 100% 0, rgb(255 76 0 / 65%), transparent), var(--bg);background-attachment:fixed}
 :root[data-theme="light"] .seeb{box-shadow:inset 0 1px 1px rgba(255,255,255,.16),0 4px 16px rgba(0,0,0,.35);filter:none}
 :root[data-theme="light"] .shoe{box-shadow:inset 0 1px 1px rgba(255,255,255,.16),0 2px 8px rgba(0,0,0,.30)}
-:root[data-theme="light"] .hero .num{filter:drop-shadow(0 0 18px rgba(244,125,82,.85)) drop-shadow(0 0 42px rgba(244,125,82,.55))}
+:root[data-theme="light"] .hero .num{color: rgb(255, 174, 0); filter:drop-shadow(0 0 18px rgba(255, 177, 76, 0.85)) drop-shadow(0 0 42px rgba(255, 216, 41, 0.55))}
 :root[data-theme="light"] dialog{box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 24px 60px rgba(0,0,0,.45)}
 :root[data-theme="light"] dialog::backdrop{background:rgba(0,0,0,.38)}
 :root[data-theme="light"] .top button,:root[data-theme="light"] .nav button,:root[data-theme="light"] .fab,:root[data-theme="light"] .scroll,:root[data-theme="light"] .dc{box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 4px 16px rgba(0,0,0,.28)}
@@ -53,7 +57,7 @@
 /* Тёмная тема: первоначальный вид */
 :root[data-theme="dark"] body{background:radial-gradient(900px 500px at 8% -8%,rgba(109,40,217,.2),transparent),radial-gradient(800px 520px at 100% 0,rgba(236,72,153,.12),transparent),var(--bg);background-attachment:fixed}
 :root[data-theme="dark"] .hero .num{color:transparent;background:none;-webkit-text-stroke:2px var(--gstroke);filter:drop-shadow(0 0 10px rgba(139,92,246,.55)) drop-shadow(0 6px 14px rgba(109,40,217,.35)) drop-shadow(0 -1px 0 rgba(255,255,255,.5))}
-:root[data-theme="dark"] td.next{outline:1px dashed var(--accent);outline-offset:-3px;border-radius:0;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+:root[data-theme="dark"] td.next{outline:2px solid var(--accent);outline-offset:-3px;border-radius:12px;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 :root[data-theme="dark"] .cp.now{background:var(--accent);color:#fff;border-radius:12px;padding:8px 10px;margin:2px -4px;border-top-color:transparent;box-shadow:none}
 :root[data-theme="dark"] .cp.now .ct,:root[data-theme="dark"] .cp.now .ct b,:root[data-theme="dark"] .cp.now .t,:root[data-theme="dark"] .cp.now .r,:root[data-theme="dark"] .cp.now::before{color:#fff}
 :root[data-theme="dark"] .cp.now .shoe{background:linear-gradient(135deg,rgba(255,255,255,.4),rgba(255,255,255,.12));border-color:rgba(255,255,255,.55);color:#fff}
@@ -84,7 +88,7 @@ th.n,td.n{width:42px;text-align:center;font-weight:700;color:var(--muted);vertic
 .les:last-child{margin:0;padding:0;border:0}
 .les b{display:block;font-size:14px}
 .les .r{color:var(--accent-ink);font-weight:600}
-.les .t{color:var(--muted);font-size:12px}
+.les .t{color:var(--muted);font-size:12px; font-weight: 500;}
 .empty{color:var(--muted);text-align:center}
 td.off{background:var(--bg);opacity:.55}
 dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);padding:16px;width:min(560px,94vw);max-height:90vh;overflow:auto}
@@ -141,7 +145,7 @@ td.now::before,td.next::before,.cp.now::before,.cp.next::before{content:attr(dat
 .shoe{display:inline-block;margin-top:4px;padding:2px 10px;border-radius:999px;color:var(--accent-ink);font-size:12px;font-weight:600;background:linear-gradient(135deg,var(--gl1),var(--gl2) 45%,var(--glt));border:1px solid rgba(255,255,255,.5);box-shadow:inset 0 1px 1px rgba(255,255,255,.75),0 2px 8px rgba(109,40,217,.15);-webkit-backdrop-filter:blur(8px) saturate(1.5);backdrop-filter:blur(8px) saturate(1.5)}
 .tg{display:flex;gap:8px;align-items:center;margin:8px 0}
 td.now{outline:2px solid var(--accent);outline-offset:-6px;border-radius:12px}
-td.next{outline:none;background:var(--glass);color:#f4efe9;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.35);border-radius:12px;-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2)}
+td.next{outline:2px solid var(--accent);outline-offset:-3px;border-radius:12px;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 .cp.now{background:linear-gradient(135deg,var(--gl1),var(--gl2) 46%,var(--glt));color:#f4efe9;border-radius:12px;padding:8px 10px;margin:2px -4px;border-top-color:transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),inset 0 1px 1px rgba(255,255,255,.22),inset 0 -12px 22px var(--glt),0 6px 20px rgba(0,0,0,.35)}
 .cp.now .ct,.cp.now .ct b,.cp.now .t,.cp.now .r,.cp.now::before{color:#f4efe9}
 .cp.now .shoe{background:linear-gradient(135deg,rgba(255,255,255,.4),rgba(255,255,255,.12));border-color:rgba(255,255,255,.55);color:#fff}
@@ -416,9 +420,10 @@ dlg2.addEventListener("click",e=>{if(e.target===dlg2)dlg2.close()});
 
 const cp0=o=>JSON.parse(JSON.stringify(o));
 const G0=cp0(G);
-const GH_REPO="s8lfov/Schedule_android",GH_BRANCH="main",GH_FILE="schedule.json";
+const GH_REPO="s8lfov/Schedule_android",GH_BRANCH="data",GH_LEGACY="main",GH_FILE="schedule.json";
 const ADMINS=["s8lfov","deft-airspace"];
 const DATA_URL="https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_BRANCH+"/"+GH_FILE;
+const LEGACY_URL="https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_LEGACY+"/"+GH_FILE;
 const ghH=t=>({"Authorization":"Bearer "+t,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"});
 const IN_APP=location.protocol==="file:";
 let OV={},SH={},ATT={},DB={},NOTICE=null,rev=0,stAt="",tok=null,tuser="";
@@ -468,12 +473,13 @@ let MY=lg("iv_my")||{};
 let MYB=lg("iv_myb")||{};
 function bellsFor(t,d){const k=iso(t);return MYB[k]||DB[k]||G[gk(d)].rows}
 {const t=lg("iv_gh");if(t&&t.token){tok=t.token;tuser=t.user}}
-const newer=s=>(+s.rev||0)>rev;
+const newer=s=>(+s.rev||0)>rev||(stAt!==""&&typeof s.at==="string"&&s.at>stAt);
 
 async function pull(){
   if(IN_APP)return;
   try{
-    const r=await fetch(DATA_URL+"?t="+Date.now(),{cache:"no-store"});
+    let r=await fetch(DATA_URL+"?t="+Date.now(),{cache:"no-store"});
+    if(!r.ok)r=await fetch(LEGACY_URL+"?t="+Date.now(),{cache:"no-store"});
     if(!r.ok)return;
     const s=await r.json();
     if(newer(s)){applyState(s);ls("iv_state",s);render()}
@@ -511,10 +517,27 @@ pull();
 const b64e=t=>btoa(unescape(encodeURIComponent(t)));
 const b64d=t=>decodeURIComponent(escape(atob(t.replace(/\s/g,""))));
 
+let branchOk=false;
+async function ensureBranch(){ // 0 — ветка есть (или создана), иначе код ошибки HTTP
+  if(branchOk)return 0;
+  const base="https://api.github.com/repos/"+GH_REPO,hd={headers:ghH(tok),cache:"no-store"};
+  const r=await fetch(base+"/branches/"+GH_BRANCH,hd);
+  if(r.ok){branchOk=true;return 0}
+  if(r.status!==404)return r.status;
+  const m=await fetch(base+"/git/ref/heads/"+GH_LEGACY,hd);
+  if(!m.ok)return m.status;
+  const sha=(await m.json()).object.sha;
+  const c=await fetch(base+"/git/refs",{method:"POST",headers:{...ghH(tok),"Content-Type":"application/json"},body:JSON.stringify({ref:"refs/heads/"+GH_BRANCH,sha})});
+  if(c.ok||c.status===422){branchOk=true;return 0} // 422 — ветка уже есть
+  return c.status;
+}
 async function push(){
   const url="https://api.github.com/repos/"+GH_REPO+"/contents/"+GH_FILE;
   const revert=async()=>{rev=-1;stAt="";await pull()};
   try{
+    const eb=await ensureBranch();
+    if(eb===401){tok=null;ls("iv_gh");await revert();return"Токен недействителен — войдите снова"}
+    if(eb)return"Не удалось подготовить ветку данных ("+eb+"). У токена должно быть разрешение Contents: Read and write";
     const g=await fetch(url+"?ref="+GH_BRANCH+"&t="+Date.now(),{headers:ghH(tok),cache:"no-store"});
     if(g.status===401){tok=null;ls("iv_gh");await revert();return"Токен недействителен — войдите снова"}
     let sha,srv=null;
@@ -826,10 +849,11 @@ fcEl.addEventListener("click",async e=>{
         const rnd=[...crypto.getRandomValues(new Uint8Array(5))].map(x=>x.toString(16).padStart(2,"0")).join("");
         const path=FILES_DIR+"/"+fK+"_"+fP+"_"+rnd+"."+ext;
         try{
+          if(await ensureBranch())throw new Error("branch");
           const r=await fetch("https://api.github.com/repos/"+GH_REPO+"/contents/"+path,{method:"PUT",headers:{...ghH(tok),"Content-Type":"application/json"},body:JSON.stringify({message:"Вложение "+fK+", пара "+fP+" ("+tuser+")",content:b64buf(pr.buf),branch:GH_BRANCH})});
           if(!r.ok)fMsg=(r.status===403||r.status===404)?"Нет прав на запись":"Ошибка загрузки ("+r.status+")";
           else{list.push({n:f.name.replace(/[<>"'\x00-\x1f]/g,"").slice(0,60)||"файл",u:path,t:ext});fMsg=await push();render()}
-        }catch(x){fMsg="Нет связи с GitHub"}
+        }catch(x){fMsg=x&&x.message==="branch"?"Не удалось подготовить ветку данных (проверьте права токена)":"Нет связи с GitHub"}
       }
     }
   }else if(b.dataset.a==="fdel"){
@@ -894,6 +918,8 @@ document.getElementById("notice").addEventListener("click",e=>{
 }
 
 const CHANGES=[
+ {d:"05.11.2026",t:"Улучшение юзабилити",i:["Пофикшена плохая читабельность номера недели в мобильной версии", "Пофикшена плохая читабельность текущей пары в мобильной версии", "Попытка фикса синхронизации недели с APK", "Расписание вынесено в отдельную ветку data: обновления приложения больше не стирают актуальное расписание"
+ ]}, 
  {d:"04.11.2026",t:"Новая светлая тема и звонки по дням",i:["Добавлена светлая тема с акцентным цветом", "Добавлено переключение тёмной и светлой темы, тема также выбирается автоматически по настройкам браузера", "В светлой теме обновлены стекло, фоновые градиенты и читаемость текста", "В мобильной версии текущая пара выделена как на десктопе, а следующая пара получила эффект Liquid Glass", "Добавлена возможность изменить расписание звонков для отдельного дня", "Админы могут изменить звонки, нажав на заголовок нужного дня", "Обычные пользователи могут изменить звонки для дня через раздел «Мои правки»", "Улучшена читаемость времени пар, номеров пар и праздничных дней"
  ]},
  {d:"02.11.2026",t:"Раздельные звонки и админка",i:[

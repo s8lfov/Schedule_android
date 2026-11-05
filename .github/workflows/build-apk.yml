@@ -38,11 +38,24 @@ jobs:
           fi
       - name: Bundle current schedule snapshot into the APK
         run: |
-          if [ -f schedule.json ]; then
+          # актуальное расписание берём прямо с GitHub (так же, как это делает приложение),
+          # а если не вышло — из файла в репозитории
+          BASE="https://raw.githubusercontent.com/${{ github.repository }}"
+          GOT=""
+          for BR in data main; do
+            if curl -fsSL "$BASE/$BR/schedule.json?t=$(date +%s)" -o "$RUNNER_TEMP/schedule.json" \
+               && python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$RUNNER_TEMP/schedule.json"; then
+              GOT="$BR"; break
+            fi
+          done
+          if [ -n "$GOT" ]; then
+            cp "$RUNNER_TEMP/schedule.json" app/src/main/assets/schedule.json
+            echo "Bundled schedule.json from GitHub (branch $GOT)"
+          elif [ -f schedule.json ]; then
             cp schedule.json app/src/main/assets/schedule.json
-            echo "Bundled schedule.json (rev: $(grep -o '"rev": *[0-9]*' schedule.json | head -n 1))"
+            echo "Bundled schedule.json from the repository checkout"
           else
-            echo "No schedule.json in the repository - the app will download it on first launch"
+            echo "WARNING: schedule.json not found on GitHub - the APK will have only the base schedule until it downloads one"
           fi
       - name: Build
         run: |
