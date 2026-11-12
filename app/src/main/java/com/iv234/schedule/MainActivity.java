@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -31,7 +32,7 @@ public class MainActivity extends Activity {
     private static final String ASSET_URL = "file:///android_asset/index.html";
     private static final boolean ADMIN_IN_APP = true;
     private static final boolean BACKGROUND_NOTICES = true;
-    private static final long POLL_MS = 30 * 1000;
+    private static final long POLL_MS = 60 * 1000; // реже опрашиваем сервер: меньше работы на слабых телефонах
 
     private static final boolean CHECK_UPDATES = true;
     private static final long CHECK_EVERY_MS = 12L * 60 * 60 * 1000;
@@ -77,6 +78,12 @@ public class MainActivity extends Activity {
         s.setGeolocationEnabled(false);
         s.setJavaScriptCanOpenWindowsAutomatically(false);
         s.setMediaPlaybackRequiresUserGesture(true);
+        // облегчение для слабых телефонов: без масштабирования щипком и «растяжки» на краях прокрутки
+        s.setSupportZoom(false);
+        s.setBuiltInZoomControls(false);
+        s.setDisplayZoomControls(false);
+        web.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        web.setVerticalScrollBarEnabled(false);
 
         web.setWebViewClient(new WebViewClient() {
             @Override
@@ -144,8 +151,8 @@ public class MainActivity extends Activity {
             Context app = getApplicationContext();
             String fresh = StateSync.fetchAndStore(app);
             if (fresh != null) StateSync.notifyIfNew(app, fresh, false);
-            final String show = fresh != null ? fresh : StateSync.cached(app);
-            if (show != null) runOnUiThread(() -> pushState(show));
+            // в страницу отправляем только новое: каждые 60 с гонять тот же JSON в WebView незачем
+            if (fresh != null) runOnUiThread(() -> pushState(fresh));
             if (onComplete != null) onComplete.run();
         }).start();
     }

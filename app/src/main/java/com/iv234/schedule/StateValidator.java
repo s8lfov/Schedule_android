@@ -54,6 +54,31 @@ final class StateValidator {
             }
             out.put("db", odb);
 
+            // объединённые пары: { "2026-11-12": [[с, по, "что вместо", "каб.", "подробности"], ...] }
+            JSONObject omg = new JSONObject();
+            JSONObject mg = in.optJSONObject("mg");
+            if (mg != null) {
+                if (mg.length() > 400) return null;
+                for (Iterator<String> it = mg.keys(); it.hasNext(); ) {
+                    String d = it.next();
+                    if (!d.matches("\\d{4}-\\d{2}-\\d{2}")) return null;
+                    JSONArray arr = mg.getJSONArray(d), oa = new JSONArray();
+                    if (arr.length() > 3) return null;
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONArray b = arr.getJSONArray(i);
+                        if (b.length() < 3) return null;
+                        int f = b.getInt(0), t = b.getInt(1);
+                        if (f < 1 || t > 5 || f >= t) return null;
+                        oa.put(new JSONArray().put(f).put(t)
+                                .put(str(b.get(2), 100))
+                                .put(str(b.length() > 3 ? b.get(3) : "", 30))
+                                .put(str(b.length() > 4 ? b.get(4) : "", 100)));
+                    }
+                    if (oa.length() > 0) omg.put(d, oa);
+                }
+            }
+            out.put("mg", omg);
+
             JSONObject oov = new JSONObject();
             JSONObject ov = in.optJSONObject("ov");
             if (ov != null) {
@@ -87,7 +112,7 @@ final class StateValidator {
                 for (Iterator<String> it = sh.keys(); it.hasNext(); ) {
                     String k = it.next();
                     str(k, 260);
-                    if (sh.optInt(k, 0) != 0 || sh.optBoolean(k, false)) osh.put(k, 1);
+                    if (sh.optInt(k, 0) != 0 || sh.optBoolean(k, false)) osh.put(str(k, 260), 1);
                 }
             }
             out.put("sh", osh);
@@ -159,15 +184,20 @@ final class StateValidator {
         return orows;
     }
 
-    /** Только строка, не длиннее max, без < > и управляющих символов. */
-    private static String str(Object o, int max) throws Exception {
+    /**
+     * Только строка. Символы < > и управляющие вычищаются, слишком длинный текст обрезается:
+     * раньше один такой символ в названии предмета отбрасывал расписание целиком.
+     * (На сайте текст всё равно экранируется при выводе.)
+     */
+    private static String str(Object o, int max) {
         if (!(o instanceof String)) throw new IllegalArgumentException();
         String v = (String) o;
-        if (v.length() > max) throw new IllegalArgumentException();
-        for (int i = 0; i < v.length(); i++) {
+        StringBuilder sb = new StringBuilder(Math.min(v.length(), max));
+        for (int i = 0; i < v.length() && sb.length() < max; i++) {
             char c = v.charAt(i);
-            if (c == '<' || c == '>' || c < 32) throw new IllegalArgumentException();
+            if (c == '<' || c == '>' || c < 32) continue;
+            sb.append(c);
         }
-        return v;
+        return sb.toString();
     }
 }

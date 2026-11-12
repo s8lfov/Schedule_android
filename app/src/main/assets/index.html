@@ -68,8 +68,8 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-appl
 .wrap{max-width:1200px;margin:0 auto}
 .hero{text-align:center;margin:10px 0 24px}
 .hero small{display:block;margin:4px 0 8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-size:13px}
-.hero .num{font-size:clamp(64px,14vw,120px);font-weight:800;line-height:1;color:var(--accent-ink)}
-.hero .lbl{font-size:clamp(18px,3vw,26px);font-weight:600}
+.hero .num{font-size:84px;font-size:clamp(64px,14vw,120px);font-weight:800;line-height:1;color:var(--accent-ink)}
+.hero .lbl{font-size:22px;font-size:clamp(18px,3vw,26px);font-weight:600}
 .hero .sub{color:var(--muted);margin-top:6px;font-size:14px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .nav{display:flex;justify-content:center;gap:8px;margin-top:18px;flex-wrap:wrap}
@@ -188,6 +188,20 @@ th.today{position:relative}
 #notice[hidden]{display:none}
 #notice span{flex:1 1 220px}
 #notice button{padding:6px 12px}
+.mr{display:flex;gap:6px;margin:6px 0;align-items:center;flex-wrap:wrap}
+.mr span{flex:1 1 140px;font-size:13px}
+.ar input.s{flex:0 0 64px;width:64px}
+#ac select.s2{flex:0 0 auto;width:auto}
+.les.mgb{padding-left:8px;border-left:3px solid var(--accent-ink)}
+.les .mgl{display:block;font-size:11px;font-weight:700;color:var(--accent-ink);margin-bottom:2px}
+/* Лёгкий режим (по умолчанию в приложении): без размытия, теней и свечения — заметно меньше нагрузка на старых телефонах */
+:root.lite[data-theme="light"]{--glass:#3f3a36}
+:root.lite[data-theme="dark"]{--glass:#262a38}
+.lite *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;text-shadow:none!important;filter:none!important;transition:none!important;animation:none!important}
+.lite dialog::backdrop{background:rgba(0,0,0,.55)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.lite body{background-image:none!important;background-attachment:scroll!important}
+.lite .dc.today{border:2px solid var(--accent-ink)!important}
+.lite td.now{outline:2px solid var(--accent)!important;outline-offset:-3px!important}
 </style>
   </head>
   <body>
@@ -199,6 +213,7 @@ th.today{position:relative}
             <button id="bells">🔔 Звонки</button>
             <button id="mybtn">✏ Мои правки</button>
             <button id="newsbtn">📣 Что нового</button>
+            <button id="litebtn">⚡ Лёгкий режим</button>
             <button id="notifbtn" hidden>🔔 Уведомления в браузере</button>
           </div>
         </div>
@@ -313,7 +328,7 @@ function render(){
   let h="<thead><tr><th class='n'>№</th>";
   DAYS.forEach((d,i)=>{
     const dt=new Date(start+i*DAY);
-    h+=`<th class="${isCur&&i===todayIdx?"today":""}" data-d="${i}">${d}${(OV[iso(start+i*DAY)]||MY[iso(start+i*DAY)])?" ✎":""}<br><span style="font-weight:400;font-size:12px">${dt.toLocaleDateString("ru-RU",{day:"numeric",month:"short",timeZone:"UTC"})}</span></th>`;
+    h+=`<th class="${isCur&&i===todayIdx?"today":""}" data-d="${i}">${d}${chg(iso(start+i*DAY))?" ✎":""}<br><span style="font-weight:400;font-size:12px">${dt.toLocaleDateString("ru-RU",{day:"numeric",month:"short",timeZone:"UTC"})}</span></th>`;
   });
   h+="</tr></thead><tbody>";
   for(let p=1;p<=5;p++){
@@ -326,8 +341,10 @@ function render(){
           h+=`<td rowspan="5" class="hol${isCur&&d===todayIdx?" today":""}">${holBox(hol,d,n,cx)}</td>`;}
         continue;
       }
+      const mb=off?null:mgAt(dayT,p);
+      if(mb&&p>mb[0])continue;
       const ls=off?[]:lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
-      h+=`<td class="${isCur&&d===todayIdx?"today":""}${off?" off":""}${cls(cp,d,p)}"${bat(cp,d,p)}${ls.length?` data-k="${iso(dayT)}" data-p="${p}"`:""}>`+(ls.length?ls.map(l=>
+      h+=`<td${mb?` rowspan="${mb[1]-mb[0]+1}"`:""} class="${isCur&&d===todayIdx?"today":""}${off?" off":""}${cls(cp,d,p)}"${bat(cp,d,p)}${ls.length?` data-k="${iso(dayT)}" data-p="${p}"`:""}>`+(ls.length?ls.map(l=>
         `${lesHtml(l)}`).join(""):`<div class="empty">—</div>`)+"</td>";
     }
     h+="</tr>";
@@ -342,17 +359,22 @@ function render(){
     for(let p=1;p<=5;p++){
       const ls=off?[]:lessonsFor(p,d,mon1+(week-1)*7*DAY+d*DAY);
       if(!ls.length||hol)continue;
-      const br=bellsFor(dayT,d).find(r=>r[0]===String(p));
-      body+=`<div class="cp${cls(cp,d,p)}"${bat(cp,d,p)} data-k="${iso(dayT)}" data-p="${p}"><div class="ct"><b>${p} пара</b><span>${br?esc(br[1]):""}</span></div>`+ls.map(l=>`${lesHtml(l)}`).join("")+"</div>";
+      const rws=bellsFor(dayT,d),mb=ls[0].mg,br=rws.find(r=>r[0]===String(p)),tm=mb?spanTime(rws,mb[0],mb[1]):(br?br[1]:"");
+      body+=`<div class="cp${cls(cp,d,p)}"${bat(cp,d,p)} data-k="${iso(dayT)}" data-p="${p}"><div class="ct"><b>${mb?mb[0]+"–"+mb[1]+" пары":p+" пара"}</b><span>${esc(tm)}</span></div>`+ls.map(l=>`${lesHtml(l)}`).join("")+"</div>";
     }
-    cs+=`<div class="dc${isCur&&d===todayIdx?" today":""}${off?" off":""}"><div class="dh2"><b>${DAYS[d]}${(OV[iso(dayT)]||MY[iso(dayT)])?" ✎":""}</b><span>${fmt(dayT)}</span></div>${body||'<div class="empty">Занятий нет</div>'}</div>`;
+    cs+=`<div class="dc${isCur&&d===todayIdx?" today":""}${off?" off":""}"><div class="dh2"><b>${DAYS[d]}${chg(iso(dayT))?" ✎":""}</b><span>${fmt(dayT)}</span></div>${body||'<div class="empty">Занятий нет</div>'}</div>`;
   }
   document.getElementById("cards").innerHTML=cs;
-  decorate();placeGlass();checkNotice();
+  decorate();placeGlass();checkNotice();lastSig=sigNow();
 }
 document.getElementById("prev").onclick=()=>{if(week>1){week--;render()}};
 document.getElementById("next").onclick=()=>{if(week<maxWeek){week++;render()}};
-document.getElementById("cur").onclick=()=>{calcNow();week=homeW();render()};
+function focusToday(){ // на телефоне: показать карточку текущего дня (в выходные — понедельник следующей недели)
+  if(!matchMedia("(max-width:760px)").matches||!(inRange&&week===realWeek))return;
+  const el=document.querySelector("#cards .dc.today")||(todayIdx>4?document.querySelector("#cards .dc"):null);
+  if(el)scrollTo(0,Math.max(0,el.getBoundingClientRect().top+scrollY-8));
+}
+document.getElementById("cur").onclick=()=>{calcNow();week=homeW();render();focusToday()};
 
 // ===== Звонки (Раздельные для Вторника, Среды и Пятницы) =====
 const G={
@@ -426,7 +448,7 @@ const DATA_URL="https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_BRANCH+"/"+GH
 const LEGACY_URL="https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_LEGACY+"/"+GH_FILE;
 const ghH=t=>({"Authorization":"Bearer "+t,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"});
 const IN_APP=location.protocol==="file:";
-let OV={},SH={},ATT={},DB={},NOTICE=null,rev=0,stAt="",tok=null,tuser="";
+let OV={},SH={},ATT={},DB={},MG={},NOTICE=null,rev=0,stAt="",tok=null,tuser="";
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const lg=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
 const ls=(k,v)=>{try{v===undefined?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
@@ -463,15 +485,39 @@ function cleanDB(a){
   }
   return o;
 }
+function cleanMG(a){ // объединённые пары: {"2026-11-12":[[с, по, "что вместо", "каб.", "подробности"]]}
+  const o={};if(!a||typeof a!=="object")return o;
+  const sx=(v,m)=>typeof v==="string"?v.replace(/[<>\x00-\x1f]/g,"").trim().slice(0,m):"";
+  for(const k in a){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(k)||!Array.isArray(a[k]))continue;
+    const rows=[];
+    for(const b of a[k].slice(0,3)){
+      if(!Array.isArray(b))continue;
+      const f=+b[0],t=+b[1];
+      if(!Number.isInteger(f)||!Number.isInteger(t)||f<1||t>5||f>=t)continue;
+      const ti=sx(b[2],100);if(!ti)continue;
+      if(rows.some(r=>f<=r[1]&&r[0]<=t))continue;
+      rows.push([f,t,ti,sx(b[3],30),sx(b[4],100)]);
+    }
+    if(rows.length)o[k]=rows.sort((x,y)=>x[0]-y[0]);
+  }
+  return o;
+}
 function applyState(s){
   if(!s||typeof s!=="object")return false;
   for(const k of["mon","tue","wed","thu","fri"]){const g=s.bells&&s.bells[k];G[k].rows=g&&Array.isArray(g.rows)?cp0(g.rows):cp0(G0[k].rows)}
-  OV=s.ov&&typeof s.ov==="object"?s.ov:{};SH=s.sh&&typeof s.sh==="object"?s.sh:{};ATT=cleanAtt(s.att);DB=cleanDB(s.db);NOTICE=cleanNotice(s.notice);rev=+s.rev||0;stAt=s.at||"";return true;
+  OV=s.ov&&typeof s.ov==="object"?s.ov:{};SH=s.sh&&typeof s.sh==="object"?s.sh:{};ATT=cleanAtt(s.att);DB=cleanDB(s.db);MG=cleanMG(s.mg);NOTICE=cleanNotice(s.notice);rev=+s.rev||0;stAt=s.at||"";return true;
 }
 applyState(lg("iv_state"));
 let MY=lg("iv_my")||{};
 let MYB=lg("iv_myb")||{};
+let MYM=lg("iv_mym")||{};
 function bellsFor(t,d){const k=iso(t);return MYB[k]||DB[k]||G[gk(d)].rows}
+// объединённые пары дня: личные правки (MYM) важнее общих (MG)
+function mergesFor(t){const k=iso(t),m=MYM[k]!==undefined?MYM[k]:MG[k];return Array.isArray(m)?m:[]}
+const mgAt=(t,p)=>mergesFor(t).find(b=>p>=b[0]&&p<=b[1])||null;
+const chg=k=>OV[k]||MY[k]||MG[k]||MYM[k];
+function spanTime(rows,a,b){const x=rows.find(r=>r[0]===String(a)),y=rows.find(r=>r[0]===String(b));return x&&y?x[1].split("–")[0]+"–"+y[1].split("–")[1]:""}
 {const t=lg("iv_gh");if(t&&t.token){tok=t.token;tuser=t.user}}
 const newer=s=>(+s.rev||0)>rev||(stAt!==""&&typeof s.at==="string"&&s.at>stAt);
 
@@ -486,28 +532,35 @@ async function pull(){
   }catch(e){}
 }
 window.__setState=t=>{try{const s=JSON.parse(t);if(newer(s)){applyState(s);render()}}catch(e){}};
-const lesHtml=l=>`<div class="les"><b>${esc(l[2])}</b>${l[3]?`<span class="r">каб. ${esc(l[3])}</span>`:""}<div class="t">${esc(l[5])}</div>${SH[l[2]+"|"+l[5]]?'<span class="shoe">👟 нужна сменка</span>':""}</div>`;
+const lesHtml=l=>`<div class="les${l.mg?" mgb":""}">${l.mg?`<span class="mgl">Пары ${l.mg[0]}–${l.mg[1]}</span>`:""}<b>${esc(l[2])}</b>${l[3]?`<span class="r">каб. ${esc(l[3])}</span>`:""}<div class="t">${esc(l[5])}</div>${SH[l[2]+"|"+l[5]]?'<span class="shoe">👟 нужна сменка</span>':""}</div>`;
 const weekOf=t=>Math.floor((t-mon1)/DAY/7)+1;
-function lessonsFor(p,d,t,noMy){const o=(!noMy&&MY[iso(t)])||OV[iso(t)];if(o)return(o[p]||[]).map(x=>[p,d,x[0],x[1],"",x[2]]);return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
+function lessonsFor(p,d,t,noMy,noMerge){
+  if(!noMerge){const b=mgAt(t,p);if(b){if(p>b[0])return[];const a=[p,d,b[2],b[3]||"","",b[4]||""];a.mg=[b[0],b[1]];return[a]}}
+  const o=(!noMy&&MY[iso(t)])||OV[iso(t)];if(o)return(o[p]||[]).map(x=>[p,d,x[0],x[1],"",x[2]]);return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
 function baseLessons(p,d,t){return L.filter(l=>l[0]===p&&l[1]===d&&l.w.has(weekOf(t)))}
 function hasPlanned(d,t){return[1,2,3,4,5].some(p=>baseLessons(p,d,t).length)}
-function isCancel(t){const k=iso(t),o=OV[k];return!MY[k]&&!!o&&[1,2,3,4,5].every(p=>!(o[p]&&o[p].length))}
+function isCancel(t){const k=iso(t),o=OV[k];return!MY[k]&&!!o&&!mergesFor(t).length&&[1,2,3,4,5].every(p=>!(o[p]&&o[p].length))}
 
 function curPair(){
   if(!(inRange&&week===realWeek)||todayIdx>4||HOL[iso(utc(now))])return null;
-  const m=now.getHours()*60+now.getMinutes(),t=utc(now);let nx=null;
-  for(const r of bellsFor(t,todayIdx)){
+  const m=now.getHours()*60+now.getMinutes(),t=utc(now),rows=bellsFor(t,todayIdx);let nx=null;
+  for(const r of rows){
     if(!/^\d$/.test(r[0]))continue;
-    const[a,b]=r[1].split("–"),p=+r[0];
-    if(m>=mins(a)&&m<mins(b)&&lessonsFor(p,todayIdx,t).length)return{p,s:"now",t:b};
-    if(m<mins(a)&&!nx&&lessonsFor(p,todayIdx,t).length)nx={p,s:"next",t:a};
+    const p=+r[0],ls=lessonsFor(p,todayIdx,t);
+    if(!ls.length)continue;
+    let[a,b]=r[1].split("–");
+    if(ls[0].mg){const e=rows.find(x=>x[0]===String(ls[0].mg[1]));if(e)b=e[1].split("–")[1]}
+    if(m>=mins(a)&&m<mins(b))return{p,s:"now",t:b};
+    if(m<mins(a)&&!nx)nx={p,s:"next",t:a};
   }
   return nx;
 }
 const cls=(c,d,p)=>c&&d===todayIdx&&c.p===p?" "+c.s:"";
 const bat=(c,d,p)=>c&&d===todayIdx&&c.p===p?` data-b="${c.s==="now"?"идёт до ":"следующая в "}${esc(c.t)}"`:"";
 
-function tickNow(){const was=week===realWeek;calcNow();if(was)week=homeW();render()}
+let lastSig="";
+const sigNow=()=>week+"|"+realWeek+"|"+todayIdx+"|"+inRange+"|"+JSON.stringify(curPair());
+function tickNow(){const was=week===realWeek;calcNow();if(was)week=homeW();if(sigNow()!==lastSig)render()}
 setInterval(()=>{if(!document.hidden)tickNow()},30000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)tickNow()});
 setInterval(()=>{if(!document.hidden)pull()},90000);
@@ -551,7 +604,7 @@ async function push(){
         else{return"Расписание только что изменил другой админ. Данные обновлены — повторите правку"}
       }
     }
-    const next={rev:Math.max(cur,rev)+1,bells:{mon:G.mon,tue:G.tue,wed:G.wed,thu:G.thu,fri:G.fri},ov:OV,db:DB,sh:SH,att:ATT,notice:NOTICE,by:tuser,at:new Date().toISOString()};
+    const next={rev:Math.max(cur,rev)+1,bells:{mon:G.mon,tue:G.tue,wed:G.wed,thu:G.thu,fri:G.fri},ov:OV,db:DB,mg:MG,sh:SH,att:ATT,notice:NOTICE,by:tuser,at:new Date().toISOString()};
     const body={message:"Расписание: правка от "+tuser,content:b64e(JSON.stringify(next)),branch:GH_BRANCH};
     if(sha)body.sha=sha;
     const p=await fetch(url,{method:"PUT",headers:{...ghH(tok),"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -564,20 +617,24 @@ async function push(){
 }
 
 const dlgA=document.getElementById("dlgA"),ac=document.getElementById("ac");
-let atab="day",aiso="",edit={},bedit={},she={},amsg="",umode=false,cat=[];
+let atab="day",aiso="",edit={},bedit={},she={},amsg="",umode=false,cat=[],emg=[],mgd={f:1,t:2,ti:"",rm:"",tx:""};
 const dIdx=t=>(new Date(t).getUTCDay()+6)%7;
 function defaultIso(){const t=utc(now)+(dow>=5?(7-dow)*DAY:0);return iso(Math.min(Math.max(t,START),END))}
-function loadDay(){const t=Date.parse(aiso+"T00:00:00Z");edit={};if(isNaN(t)||dIdx(t)>4)return;for(let p=1;p<=5;p++)edit[p]=lessonsFor(p,dIdx(t),t,!umode).map(l=>[l[2],l[3],l[5]])}
+function loadDay(){const t=Date.parse(aiso+"T00:00:00Z");edit={};emg=[];if(isNaN(t)||dIdx(t)>4)return;emg=cp0(umode?mergesFor(t):(MG[aiso]||[]));for(let p=1;p<=5;p++)edit[p]=lessonsFor(p,dIdx(t),t,!umode,true).map(l=>[l[2],l[3],l[5]])}
 
 function dayHtml(){
   const t=Date.parse(aiso+"T00:00:00Z");
   let h=`<div class="ar"><input type="date" id="ad" value="${esc(aiso)}" min="2026-09-01" max="2026-12-31"></div>`;
   if(isNaN(t)||dIdx(t)>4)return h+`<div class="t">Выберите будний день.</div>`;
-  h+=`<div class="t">${DAYS[dIdx(t)]}${(umode?MY[aiso]:OV[aiso])?" · изменено вручную":""}${HOL[aiso]?" · праздник: "+HOL[aiso]:""}</div>`;
+  h+=`<div class="t">${DAYS[dIdx(t)]}${(umode?(MY[aiso]||MYM[aiso]):(OV[aiso]||MG[aiso]))?" · изменено вручную":""}${HOL[aiso]?" · праздник: "+HOL[aiso]:""}</div>`;
   if(!umode)h+=`<div class="t">Чтобы отменить день, уберите все пары и сохраните: он будет показан как выходной с причиной «отмена пар».</div>`;
   cat=catalog();
   const opts=`<option value="">＋ выбрать из списка…</option>`+cat.map((c,k)=>`<option value="${k}">${esc(c[0])} · ${esc(c[2])}${c[1]?" · каб. "+esc(c[1]):""}${SH[c[0]+"|"+c[2]]?" 👟":""}</option>`).join("");
   for(let p=1;p<=5;p++)h+=`<div class="ap"><b>${p} пара</b>`+(edit[p]||[]).map((x,i)=>`<div class="lr" data-p="${p}"><input placeholder="Предмет" maxlength="100" value="${esc(x[0])}"><input class="s" placeholder="Каб." maxlength="30" value="${esc(x[1])}"><input placeholder="Преподаватель" maxlength="100" value="${esc(x[2])}">${SH[x[0]+"|"+x[2]]?'<span class="shoe">👟 нужна сменка</span>':""}<button data-a="del" data-p="${p}" data-i="${i}">✕</button></div>`).join("")+`<div class="ar"><select class="qs" data-p="${p}">${opts}</select><button data-a="add" data-p="${p}">+ вручную</button></div></div>`;
+  const mo=n=>[1,2,3,4,5].map(i=>`<option value="${i}"${i===n?" selected":""}>${i}</option>`).join("");
+  h+=`<div class="ap"><b>Объединить пары</b><div class="t">Несколько пар подряд можно заменить одним пунктом, например «Мероприятие» (когда нужно прийти к первой паре, а потом группа уходит). Пары внутри диапазона скроются, а в расписании появится один блок на всё это время.</div>`
+    +emg.map((b,i)=>`<div class="mr"><b>${b[0]}–${b[1]} пары</b><span>${esc(b[2])}${b[3]?" · каб. "+esc(b[3]):""}${b[4]?" · "+esc(b[4]):""}</span><button data-a="mgdel" data-i="${i}">✕</button></div>`).join("")
+    +`<div class="ar">С <select id="mf" class="s2">${mo(mgd.f)}</select> по <select id="mt" class="s2">${mo(mgd.t)}</select> пару</div><div class="ar"><input id="mti" placeholder="Что вместо пар (например, Мероприятие)" maxlength="100" value="${esc(mgd.ti)}"><input class="s" id="mrm" placeholder="Каб." maxlength="30" value="${esc(mgd.rm)}"><input id="mtx" placeholder="Подробности (необязательно)" maxlength="100" value="${esc(mgd.tx)}"><button data-a="mgadd">＋ Объединить</button></div></div>`;
   h+=`<div class="ar"><button class="seeb" data-a="saveday">Сохранить день</button><button data-a="resetday">Вернуть по умолчанию</button><button data-a="daybells">🔔 Звонки на этот день</button></div>`;
   if(!umode)h+=`<div class="ap"><b>Уведомление об изменении</b><div class="t">Отправляет всем сообщение, что расписание на этот день изменено: оно появится на сайте и придёт уведомлением в приложение. Сначала сохраните изменения дня.</div><div class="ar"><input id="ncomm" maxlength="100" placeholder="Комментарий (необязательно)"><button class="seeb" data-a="notify">🔔 Отправить уведомление</button></div></div>`;
   return h;
@@ -595,7 +652,7 @@ function tagsHtml(){
 }
 
 function dataHtml(){
-  return`<div class="t">Здесь можно скопировать всё расписание текстом (резервная копия) или вставить новое и нажать «Загрузить».</div><textarea id="ajson" rows="8">${esc(JSON.stringify({bells:{mon:G.mon,tue:G.tue,wed:G.wed,thu:G.thu,fri:G.fri},ov:OV,db:DB,sh:SH}))}</textarea><div class="ar"><button class="seeb" data-a="import">Загрузить</button><button data-a="resetall">Сбросить всё</button><button data-a="logout">Выйти из учетки</button></div>`;
+  return`<div class="t">Здесь можно скопировать всё расписание текстом (резервная копия) или вставить новое и нажать «Загрузить».</div><textarea id="ajson" rows="8">${esc(JSON.stringify({bells:{mon:G.mon,tue:G.tue,wed:G.wed,thu:G.thu,fri:G.fri},ov:OV,db:DB,mg:MG,sh:SH}))}</textarea><div class="ar"><button class="seeb" data-a="import">Загрузить</button><button data-a="resetall">Сбросить всё</button><button data-a="logout">Выйти из учетки</button></div>`;
 }
 
 function catalog(){
@@ -621,7 +678,7 @@ function drawAdmin(){
 }
 
 function collect(){
-  if(atab==="day"){const e={};for(let p=1;p<=5;p++)e[p]=[];ac.querySelectorAll(".lr").forEach(r=>{const i=r.querySelectorAll("input");e[r.dataset.p].push([i[0].value.trim(),i[1].value.trim(),i[2].value.trim()])});edit=e}
+  if(atab==="day"){const e={};for(let p=1;p<=5;p++)e[p]=[];ac.querySelectorAll(".lr").forEach(r=>{const i=r.querySelectorAll("input");e[r.dataset.p].push([i[0].value.trim(),i[1].value.trim(),i[2].value.trim()])});edit=e;const g=id=>ac.querySelector("#"+id);if(g("mf")){mgd.f=+g("mf").value;mgd.t=+g("mt").value;mgd.ti=g("mti").value;mgd.rm=g("mrm").value;mgd.tx=g("mtx").value}}
   else if(atab==="bells"){const e={mon:[],tue:[],wed:[],thu:[],fri:[]};ac.querySelectorAll(".br").forEach(r=>{const i=r.querySelectorAll("input"),row=[i[0].value.trim(),i[1].value.trim(),i[2].value.trim()];if(i[3].checked)row.push(1);e[r.dataset.g].push(row)});bedit=e}
   else if(atab==="tags"){const n={};ac.querySelectorAll(".tg input").forEach(i=>{if(i.checked)n[i.dataset.k]=1});she=n}
 }
@@ -653,8 +710,18 @@ ac.addEventListener("click",async e=>{
   if(a==="tab"){atab=b.dataset.k;if(atab==="day")loadDay();if(atab==="bells")bedit=bellsCopy();if(atab==="tags")she=cp0(SH)}
   else if(a==="add")edit[b.dataset.p].push(["","",""]);
   else if(a==="del")edit[b.dataset.p].splice(+b.dataset.i,1);
-  else if(a==="saveday"){const o={};for(let p=1;p<=5;p++)o[p]=edit[p].filter(x=>x[0]);if(umode){MY[aiso]=o;ls("iv_my",MY);amsg="Сохранено на этом устройстве";render()}else{OV[aiso]=o;amsg=await push()}}
-  else if(a==="resetday"){if(umode){delete MY[aiso];ls("iv_my",MY);amsg="Возвращено по умолчанию";render()}else{delete OV[aiso];amsg=await push()}loadDay()}
+  else if(a==="saveday"){const o={};for(let p=1;p<=5;p++)o[p]=edit[p].filter(x=>x[0]);
+    if(umode){MY[aiso]=o;ls("iv_my",MY);if(emg.length||(MG[aiso]&&MG[aiso].length))MYM[aiso]=cp0(emg);else delete MYM[aiso];ls("iv_mym",MYM);amsg="Сохранено на этом устройстве";render()}
+    else{OV[aiso]=o;if(emg.length)MG[aiso]=cp0(emg);else delete MG[aiso];amsg=await push()}}
+  else if(a==="resetday"){if(umode){delete MY[aiso];delete MYM[aiso];ls("iv_my",MY);ls("iv_mym",MYM);amsg="Возвращено по умолчанию";render()}else{delete OV[aiso];delete MG[aiso];amsg=await push()}loadDay()}
+  else if(a==="mgadd"){
+    const cl=v=>String(v).replace(/[<>\x00-\x1f]/g,"").trim(),f=mgd.f,t=mgd.t,ti=cl(mgd.ti);
+    if(!ti)amsg="Напишите, что будет вместо пар";
+    else if(!(f>=1&&t<=5&&f<t))amsg="Выберите диапазон: номер в «С» должен быть меньше, чем в «по»";
+    else if(emg.some(r=>f<=r[1]&&r[0]<=t))amsg="Этот диапазон пересекается с уже объединёнными парами";
+    else if(emg.length>=3)amsg="Не больше 3 объединений на день";
+    else{emg.push([f,t,ti.slice(0,100),cl(mgd.rm).slice(0,30),cl(mgd.tx).slice(0,100)]);emg.sort((x,y)=>x[0]-y[0]);mgd.ti=mgd.rm=mgd.tx="";amsg="Добавлено. Нажмите «Сохранить день»"}}
+  else if(a==="mgdel"){emg.splice(+b.dataset.i,1);amsg="Убрано. Нажмите «Сохранить день»"}
   else if(a==="daybells"){dlgA.close();openDayBells(dIdx(Date.parse(aiso+"T00:00:00Z")),umode,aiso);return}
   else if(a==="badd")bedit[b.dataset.g].push(["","",""]);
   else if(a==="bdel")bedit[b.dataset.g].splice(+b.dataset.i,1);
@@ -667,7 +734,7 @@ ac.addEventListener("click",async e=>{
     const j=JSON.parse(document.getElementById("ajson").value);
     for(const k of["mon","tue","wed","thu","fri"])if(!j.bells||!j.bells[k]||!Array.isArray(j.bells[k].rows))throw 0;
     for(const k of["mon","tue","wed","thu","fri"])G[k].rows=cp0(j.bells[k].rows);
-    OV=j.ov&&typeof j.ov==="object"?j.ov:{};SH=j.sh&&typeof j.sh==="object"?j.sh:{};DB=cleanDB(j.db);
+    OV=j.ov&&typeof j.ov==="object"?j.ov:{};SH=j.sh&&typeof j.sh==="object"?j.sh:{};DB=cleanDB(j.db);MG=cleanMG(j.mg);
     amsg=await push()}catch(x){amsg="Неверный формат данных"}}
   else if(a==="notify"){
     const t=Date.parse(aiso+"T00:00:00Z");
@@ -684,7 +751,7 @@ ac.addEventListener("click",async e=>{
   else if(a==="logout"){tok=null;tuser="";ls("iv_gh");drawAdmin();dlgA.close();syncTop()}
   else if(a==="resetall"){
     if(!b.dataset.c){b.dataset.c=1;b.textContent="Нажмите ещё раз";return}
-    ["mon","tue","wed","thu","fri"].forEach(k=>G[k].rows=cp0(G0[k].rows));OV={};SH={};DB={};amsg=await push()}
+    ["mon","tue","wed","thu","fri"].forEach(k=>G[k].rows=cp0(G0[k].rows));OV={};SH={};DB={};MG={};amsg=await push()}
   drawAdmin();
 });
 
@@ -697,7 +764,7 @@ const openAdmin=()=>{umode=false;document.getElementById("ath").textContent="⚙
 document.getElementById("admbtn").onclick=openAdmin;
 document.getElementById("xa").onclick=()=>dlgA.close();
 dlgA.addEventListener("click",e=>{if(e.target===dlgA)dlgA.close()});
-const openMy=()=>{umode=true;document.getElementById("ath").textContent="✏ Мои правки";amsg="";aiso=defaultIso();loadDay();drawAdmin();dlgA.showModal()};
+const openMy=()=>{umode=true;atab="day";document.getElementById("ath").textContent="✏ Мои правки";amsg="";aiso=defaultIso();loadDay();drawAdmin();dlgA.showModal()};
 document.getElementById("mybtn").onclick=openMy;
 
 {
@@ -723,7 +790,19 @@ function canAttach(){return !!tok&&!IN_APP}
 
 const dlgF=document.getElementById("dlgF"),fcEl=document.getElementById("fc");
 let fK="",fP=0,fMsg="";
-const furl=u=>"https://raw.githubusercontent.com/"+GH_REPO+"/"+GH_BRANCH+"/"+u;
+const furl=(u,b)=>"https://raw.githubusercontent.com/"+GH_REPO+"/"+(b||GH_BRANCH)+"/"+u;
+const fileBase={};
+async function fixFileLinks(){ // файлы, загруженные до переезда в ветку data, могут лежать ещё в main
+  for(const el of fcEl.querySelectorAll("[data-u]")){
+    const u=el.dataset.u;
+    if(fileBase[u]===undefined){
+      fileBase[u]=GH_BRANCH;
+      try{const r=await fetch(furl(u),{method:"HEAD",cache:"no-store"});
+        if(r.status===404){const r2=await fetch(furl(u,GH_LEGACY),{method:"HEAD",cache:"no-store"});if(r2.ok)fileBase[u]=GH_LEGACY}}catch(e){}
+    }
+    if(fileBase[u]!==GH_BRANCH){const nu=furl(u,fileBase[u]);if(el.tagName==="A")el.href=nu;else el.src=nu}
+  }
+}
 function openFiles(k,p){fK=k;fP=p;fMsg="";drawFiles();dlgF.showModal()}
 
 function drawFiles(){
@@ -733,10 +812,11 @@ function drawFiles(){
   let h=a.length?"":`<div class="t">Вложений пока нет.</div>`;
   a.forEach((x,i)=>{
     const u=furl(x.u);
-    h+=`<div class="fi">${x.t!=="pdf"&&!IN_APP?`<a href="${u}"${tg}><img class="fimg" src="${u}" loading="lazy" alt="" referrerpolicy="no-referrer"></a>`:""}<a href="${u}"${tg}>${x.t==="pdf"?"📄":"🖼"} ${esc(x.n)}</a>${canAttach()?`<button data-a="fdel" data-i="${i}">Удалить</button>`:""}</div>`;
+    h+=`<div class="fi">${x.t!=="pdf"&&!IN_APP?`<a href="${u}" data-u="${esc(x.u)}"${tg}><img class="fimg" data-u="${esc(x.u)}" src="${u}" loading="lazy" alt="" referrerpolicy="no-referrer"></a>`:""}<a href="${u}" data-u="${esc(x.u)}"${tg}>${x.t==="pdf"?"📄":"🖼"} ${esc(x.n)}</a>${canAttach()?`<button data-a="fdel" data-i="${i}">Удалить</button>`:""}</div>`;
   });
   if(canAttach())h+=`<div class="ap"><input type="file" id="ff" accept="image/jpeg,image/png,image/webp,application/pdf"><div class="ar"><button class="seeb" data-a="fup">Прикрепить</button></div><div class="t">Только JPG, PNG, WEBP или PDF, до 5 МБ, не больше 5 файлов на пару.</div></div>`;
   fcEl.innerHTML=h+`<div class="am">${esc(fMsg)}</div>`;
+  fixFileLinks();
 }
 
 async function sniff(f){
@@ -918,6 +998,7 @@ document.getElementById("notice").addEventListener("click",e=>{
 }
 
 const CHANGES=[
+ {d:"12.11.2026",t:"Объединение пар, текущий день и лёгкий режим",i:["Можно объединить несколько пар подряд и поставить вместо них одно событие, например мероприятие (админ-панель → Пары на день → «Объединить пары»)", "В мобильной версии и приложении при открытии сразу показывается текущий день, а в выходные — понедельник", "Лёгкий режим (меню ☰): без размытия и теней, чтобы на старых телефонах не лагало; в приложении включён по умолчанию", "Вложения хранятся в отдельной ветке data и не пропадают при обновлении сайта или приложения", "Расписание на экране перерисовывается только при изменениях, а не каждые 30 секунд"]},
  {d:"05.11.2026",t:"Улучшение юзабилити",i:["Пофикшена плохая читабельность номера недели в мобильной версии", "Пофикшена плохая читабельность текущей пары в мобильной версии", "Попытка фикса синхронизации недели с APK", "Расписание вынесено в отдельную ветку data: обновления приложения больше не стирают актуальное расписание"
  ]}, 
  {d:"04.11.2026",t:"Новая светлая тема и звонки по дням",i:["Добавлена светлая тема с акцентным цветом", "Добавлено переключение тёмной и светлой темы, тема также выбирается автоматически по настройкам браузера", "В светлой теме обновлены стекло, фоновые градиенты и читаемость текста", "В мобильной версии текущая пара выделена как на десктопе, а следующая пара получила эффект Liquid Glass", "Добавлена возможность изменить расписание звонков для отдельного дня", "Админы могут изменить звонки, нажав на заголовок нужного дня", "Обычные пользователи могут изменить звонки для дня через раздел «Мои правки»", "Улучшена читаемость времени пар, номеров пар и праздничных дней"
@@ -1004,12 +1085,19 @@ dlgB.addEventListener("click",e=>{if(e.target===dlgB)dlgB.close()});
   const apply=t=>{document.documentElement.dataset.theme=t;ls("iv_theme",t);btn.textContent=t==="dark"?"☀️":"🌙"};
   apply(lg("iv_theme")||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"));
   btn.onclick=()=>apply(document.documentElement.dataset.theme==="dark"?"light":"dark");
-  matchMedia("(prefers-color-scheme: light)").addEventListener("change",e=>{
-    if(!lg("iv_theme"))apply(e.matches?"light":"dark");
-  });
+  const mq=matchMedia("(prefers-color-scheme: light)"),onMq=e=>{if(!lg("iv_theme"))apply(e.matches?"light":"dark")};
+  if(mq.addEventListener)mq.addEventListener("change",onMq);else if(mq.addListener)mq.addListener(onMq);
 }
 
-render();
+{
+  const root=document.documentElement,btn=document.getElementById("litebtn");
+  const isLite=()=>{const v=lg("iv_lite");return v===null?IN_APP:!!v};
+  const apply=()=>{const on=isLite();root.classList.toggle("lite",on);btn.textContent=on?"⚡ Лёгкий режим: вкл":"⚡ Лёгкий режим: выкл"};
+  apply();
+  btn.onclick=()=>{ls("iv_lite",isLite()?0:1);apply()};
+}
+
+render();focusToday();
 </script>
   </body>
 </html>
